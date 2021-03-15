@@ -1,0 +1,5 @@
+n_files=3
+total_mb=6.8
+DETECTOR=CCD
+SUBARRAY=False
+CRSPLIT=2.0

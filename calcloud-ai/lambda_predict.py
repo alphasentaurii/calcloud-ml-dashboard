@@ -143,8 +143,10 @@ def lambda_handler(event, context):
     """Predict Resource Allocation requirements for memory (bin and GB estimated value) as well as max execution/wallclock time (seconds).
     Memory Bins: 0: < 2GB, 1: 2-8GB, 2: 8-16GB, 3: >16GB
     """
-    bucket_name = event['Records'][0]['s3']['bucket']['name']
-    key = event['Records'][0]['s3']['object']['key']
+    #bucket_name = event['Records'][0]['s3']['bucket']['name']
+    #key = event['Records'][0]['s3']['object']['key']
+    bucket_name = event['Bucket']
+    key = event['Key']
     ipppssoot = key.split('/')[-1].split('_')[0]
     prep = Preprocess(ipppssoot, bucket_name, key)
     prep.input_data = prep.import_data()
