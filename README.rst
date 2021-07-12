@@ -24,19 +24,17 @@ Install
 -------
 
 Using setup.py::
-..
-    git clone https://grit.stsci.edu/rkein/calcloud-machine-learning
-    cd calcloud-machine-learning
-    python setup.py install --user
+.. git clone https://grit.stsci.edu/rkein/calcloud-machine-learning
+.. cd calcloud-machine-learning
+.. python setup.py install --user
 
 
 Using virtual env::
-..
-    git clone https://grit.stsci.edu/rkein/calcloud-machine-learning
-    python virtualenv dash-venv
-    source dash-venv/bin/activate
-    cd calcloud-machine-learning
-    pip install -r requirements.txt
+.. git clone https://grit.stsci.edu/rkein/calcloud-machine-learning
+.. python virtualenv dash-venv
+.. source dash-venv/bin/activate
+.. cd calcloud-machine-learning
+.. pip install -r requirements.txt
 
 
 Run
