@@ -6,7 +6,7 @@ except ImportError:
     TESTED_VERSIONS = {}
 
 try:
-    from packagename import __version__ as version
+    from calcloudML import __version__ as version
 except ImportError:
     version = 'unknown'
 
@@ -22,4 +22,4 @@ PYTEST_HEADER_MODULES.pop('Matplotlib')
 PYTEST_HEADER_MODULES.pop('Pandas')
 PYTEST_HEADER_MODULES.pop('h5py')
 
-TESTED_VERSIONS['packagename'] = version
+TESTED_VERSIONS['calcloudML'] = version
