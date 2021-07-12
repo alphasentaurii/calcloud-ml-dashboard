@@ -24,14 +24,14 @@ Install
 -------
 
 Using setup.py
-.. highlight:: bash
+.. :: bash
     git clone https://grit.stsci.edu/rkein/calcloud-machine-learning
     cd calcloud-machine-learning
     python setup.py install --user
 
 
 Using virtual env
-.. highlight:: bash
+.. :: bash
     git clone https://grit.stsci.edu/rkein/calcloud-machine-learning
     python virtualenv dash-venv
     source dash-venv/bin/activate
