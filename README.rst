@@ -23,15 +23,13 @@ Artifical Neural Networks for predicting compute resource requirements for Hubbl
 Install
 -------
 
-Using setup.py
-.. :: bash
+Using setup.py:: bash
     git clone https://grit.stsci.edu/rkein/calcloud-machine-learning
     cd calcloud-machine-learning
     python setup.py install --user
 
 
-Using virtual env
-.. :: bash
+Using virtual env:: bash
     git clone https://grit.stsci.edu/rkein/calcloud-machine-learning
     python virtualenv dash-venv
     source dash-venv/bin/activate
