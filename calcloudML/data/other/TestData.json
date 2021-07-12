@@ -1,0 +1,634 @@
+{
+    "calcloud-model-sb": [
+        {
+            "PutRequest": {
+                "Item": {
+                    "x_files": {
+                        "N": "1.6313035653743424"
+                    },
+                    "x_size": {
+                        "N": "2.1438642345805277"
+                    },
+                    "drizcorr": {
+                        "N": "1"
+                    },
+                    "pctecorr": {
+                        "N": "1"
+                    },
+                    "crsplit": {
+                        "N": "1"
+                    },
+                    "subarray": {
+                        "N": "0"
+                    },
+                    "detector": {
+                        "N": "1"
+                    },
+                    "dtype": {
+                        "N": "1"
+                    },
+                    "instr": {
+                        "N": "3"
+                    },
+                    "wallclock": {
+                        "N": "17442.0"
+                    },
+                    "memory": {
+                        "N": "35.54"
+                    },
+                    "mem_bin": {
+                        "N": "3.0"
+                    },
+                    "n_files": {
+                        "N": "9.0"
+                    },
+                    "total_mb": {
+                        "N": "279.1"
+                    },
+                    "bin_pred": {
+                        "N": ""
+                    },
+                    "mem_pred": {
+                        "N": ""
+                    },
+                    "wall_pred": {
+                        "N": ""
+                    },
+                    "ipst": {
+                        "S": "id6q01020"
+                    },
+                    "timestamp": {
+                        "N": "1620740441"
+                    }
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "x_files": {
+                        "N": "1.8653101841510609"
+                    },
+                    "x_size": {
+                        "N": "2.2309253302731498"
+                    },
+                    "drizcorr": {
+                        "N": "1"
+                    },
+                    "pctecorr": {
+                        "N": "0"
+                    },
+                    "crsplit": {
+                        "N": "0"
+                    },
+                    "subarray": {
+                        "N": "0"
+                    },
+                    "detector": {
+                        "N": "0"
+                    },
+                    "dtype": {
+                        "N": "1"
+                    },
+                    "instr": {
+                        "N": "3"
+                    },
+                    "wallclock": {
+                        "N": "955.0"
+                    },
+                    "memory": {
+                        "N": "23.71"
+                    },
+                    "mem_bin": {
+                        "N": "3.0"
+                    },
+                    "n_files": {
+                        "N": "15.0"
+                    },
+                    "total_mb": {
+                        "N": "327.6"
+                    },
+                    "bin_pred": {
+                        "N": ""
+                    },
+                    "mem_pred": {
+                        "N": ""
+                    },
+                    "wall_pred": {
+                        "N": ""
+                    },
+                    "ipst": {
+                        "S": "id6l09010"
+                    },
+                    "timestamp": {
+                        "N": "1620740441"
+                    }
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "x_files": {
+                        "N": "-3.2299932216233636"
+                    },
+                    "x_size": {
+                        "N": "0.19646384000139933"
+                    },
+                    "drizcorr": {
+                        "N": "0"
+                    },
+                    "pctecorr": {
+                        "N": "0"
+                    },
+                    "crsplit": {
+                        "N": "0"
+                    },
+                    "subarray": {
+                        "N": "0"
+                    },
+                    "detector": {
+                        "N": "0"
+                    },
+                    "dtype": {
+                        "N": "0"
+                    },
+                    "instr": {
+                        "N": "3"
+                    },
+                    "wallclock": {
+                        "N": "20.0"
+                    },
+                    "memory": {
+                        "N": "1.08"
+                    },
+                    "mem_bin": {
+                        "N": "0.0"
+                    },
+                    "n_files": {
+                        "N": "1.0"
+                    },
+                    "total_mb": {
+                        "N": "10.6"
+                    },
+                    "bin_pred": {
+                        "N": ""
+                    },
+                    "mem_pred": {
+                        "N": ""
+                    },
+                    "wall_pred": {
+                        "N": ""
+                    },
+                    "ipst": {
+                        "S": "iaaa02siq"
+                    },
+                    "timestamp": {
+                        "N": "1620740441"
+                    }
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "x_files": {
+                        "N": "1.3008477278950876"
+                    },
+                    "x_size": {
+                        "N": "1.8835205430924904"
+                    },
+                    "drizcorr": {
+                        "N": "1"
+                    },
+                    "pctecorr": {
+                        "N": "1"
+                    },
+                    "crsplit": {
+                        "N": "1"
+                    },
+                    "subarray": {
+                        "N": "0"
+                    },
+                    "detector": {
+                        "N": "1"
+                    },
+                    "dtype": {
+                        "N": "1"
+                    },
+                    "instr": {
+                        "N": "3"
+                    },
+                    "wallclock": {
+                        "N": "9794.0"
+                    },
+                    "memory": {
+                        "N": "17.96"
+                    },
+                    "mem_bin": {
+                        "N": "3.0"
+                    },
+                    "n_files": {
+                        "N": "6.0"
+                    },
+                    "total_mb": {
+                        "N": "174.5"
+                    },
+                    "bin_pred": {
+                        "N": ""
+                    },
+                    "mem_pred": {
+                        "N": ""
+                    },
+                    "wall_pred": {
+                        "N": ""
+                    },
+                    "ipst": {
+                        "S": "idan29020"
+                    },
+                    "timestamp": {
+                        "N": "1620740441"
+                    }
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "x_files": {
+                        "N": "1.6931652094484353"
+                    },
+                    "x_size": {
+                        "N": "0.3696900149665785"
+                    },
+                    "drizcorr": {
+                        "N": "1"
+                    },
+                    "pctecorr": {
+                        "N": "0"
+                    },
+                    "crsplit": {
+                        "N": "0"
+                    },
+                    "subarray": {
+                        "N": "1"
+                    },
+                    "detector": {
+                        "N": "0"
+                    },
+                    "dtype": {
+                        "N": "1"
+                    },
+                    "instr": {
+                        "N": "3"
+                    },
+                    "wallclock": {
+                        "N": "197.0"
+                    },
+                    "memory": {
+                        "N": "10.33"
+                    },
+                    "mem_bin": {
+                        "N": "2.0"
+                    },
+                    "n_files": {
+                        "N": "10.0"
+                    },
+                    "total_mb": {
+                        "N": "14.0"
+                    },
+                    "bin_pred": {
+                        "N": ""
+                    },
+                    "mem_pred": {
+                        "N": ""
+                    },
+                    "wall_pred": {
+                        "N": ""
+                    },
+                    "ipst": {
+                        "S": "ibr62a020"
+                    },
+                    "timestamp": {
+                        "N": "1620740441"
+                    }
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "x_files": {
+                        "N": "1.0921440788857568"
+                    },
+                    "x_size": {
+                        "N": "1.6661583436159777"
+                    },
+                    "drizcorr": {
+                        "N": "1"
+                    },
+                    "pctecorr": {
+                        "N": "0"
+                    },
+                    "crsplit": {
+                        "N": "0"
+                    },
+                    "subarray": {
+                        "N": "0"
+                    },
+                    "detector": {
+                        "N": "0"
+                    },
+                    "dtype": {
+                        "N": "1"
+                    },
+                    "instr": {
+                        "N": "3"
+                    },
+                    "wallclock": {
+                        "N": "155.0"
+                    },
+                    "memory": {
+                        "N": "1.34"
+                    },
+                    "mem_bin": {
+                        "N": "0.0"
+                    },
+                    "n_files": {
+                        "N": "5.0"
+                    },
+                    "total_mb": {
+                        "N": "119.1"
+                    },
+                    "bin_pred": {
+                        "N": ""
+                    },
+                    "mem_pred": {
+                        "N": ""
+                    },
+                    "wall_pred": {
+                        "N": ""
+                    },
+                    "ipst": {
+                        "S": "ia2k14020"
+                    },
+                    "timestamp": {
+                        "N": "1620740441"
+                    }
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "x_files": {
+                        "N": "0.2397118177539458"
+                    },
+                    "x_size": {
+                        "N": "-0.7182475286062124"
+                    },
+                    "drizcorr": {
+                        "N": "1"
+                    },
+                    "pctecorr": {
+                        "N": "0"
+                    },
+                    "crsplit": {
+                        "N": "0"
+                    },
+                    "subarray": {
+                        "N": "1"
+                    },
+                    "detector": {
+                        "N": "0"
+                    },
+                    "dtype": {
+                        "N": "1"
+                    },
+                    "instr": {
+                        "N": "3"
+                    },
+                    "wallclock": {
+                        "N": "43.0"
+                    },
+                    "memory": {
+                        "N": "1.1"
+                    },
+                    "mem_bin": {
+                        "N": "0.0"
+                    },
+                    "n_files": {
+                        "N": "3.0"
+                    },
+                    "total_mb": {
+                        "N": "2.2"
+                    },
+                    "bin_pred": {
+                        "N": ""
+                    },
+                    "mem_pred": {
+                        "N": ""
+                    },
+                    "wall_pred": {
+                        "N": ""
+                    },
+                    "ipst": {
+                        "S": "iaac13070"
+                    },
+                    "timestamp": {
+                        "N": "1620740441"
+                    }
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "x_files": {
+                        "N": "-3.2299932216233636"
+                    },
+                    "x_size": {
+                        "N": "0.19646384000139933"
+                    },
+                    "drizcorr": {
+                        "N": "0"
+                    },
+                    "pctecorr": {
+                        "N": "0"
+                    },
+                    "crsplit": {
+                        "N": "0"
+                    },
+                    "subarray": {
+                        "N": "0"
+                    },
+                    "detector": {
+                        "N": "0"
+                    },
+                    "dtype": {
+                        "N": "0"
+                    },
+                    "instr": {
+                        "N": "3"
+                    },
+                    "wallclock": {
+                        "N": "12.0"
+                    },
+                    "memory": {
+                        "N": "1.08"
+                    },
+                    "mem_bin": {
+                        "N": "0.0"
+                    },
+                    "n_files": {
+                        "N": "1.0"
+                    },
+                    "total_mb": {
+                        "N": "10.6"
+                    },
+                    "bin_pred": {
+                        "N": ""
+                    },
+                    "mem_pred": {
+                        "N": ""
+                    },
+                    "wall_pred": {
+                        "N": ""
+                    },
+                    "ipst": {
+                        "S": "iaaa01ugq"
+                    },
+                    "timestamp": {
+                        "N": "1620740441"
+                    }
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "x_files": {
+                        "N": "1.0921440788857568"
+                    },
+                    "x_size": {
+                        "N": "1.7571434890922968"
+                    },
+                    "drizcorr": {
+                        "N": "1"
+                    },
+                    "pctecorr": {
+                        "N": "1"
+                    },
+                    "crsplit": {
+                        "N": "1"
+                    },
+                    "subarray": {
+                        "N": "0"
+                    },
+                    "detector": {
+                        "N": "1"
+                    },
+                    "dtype": {
+                        "N": "1"
+                    },
+                    "instr": {
+                        "N": "3"
+                    },
+                    "wallclock": {
+                        "N": "5605.0"
+                    },
+                    "memory": {
+                        "N": "13.22"
+                    },
+                    "mem_bin": {
+                        "N": "2.0"
+                    },
+                    "n_files": {
+                        "N": "5.0"
+                    },
+                    "total_mb": {
+                        "N": "139.6"
+                    },
+                    "bin_pred": {
+                        "N": ""
+                    },
+                    "mem_pred": {
+                        "N": ""
+                    },
+                    "wall_pred": {
+                        "N": ""
+                    },
+                    "ipst": {
+                        "S": "ic2868010"
+                    },
+                    "timestamp": {
+                        "N": "1620740441"
+                    }
+                }
+            }
+        },
+        {
+            "PutRequest": {
+                "Item": {
+                    "x_files": {
+                        "N": "1.0921440788857568"
+                    },
+                    "x_size": {
+                        "N": "1.6661583436159777"
+                    },
+                    "drizcorr": {
+                        "N": "1"
+                    },
+                    "pctecorr": {
+                        "N": "0"
+                    },
+                    "crsplit": {
+                        "N": "0"
+                    },
+                    "subarray": {
+                        "N": "0"
+                    },
+                    "detector": {
+                        "N": "0"
+                    },
+                    "dtype": {
+                        "N": "1"
+                    },
+                    "instr": {
+                        "N": "3"
+                    },
+                    "wallclock": {
+                        "N": "140.0"
+                    },
+                    "memory": {
+                        "N": "1.2"
+                    },
+                    "mem_bin": {
+                        "N": "0.0"
+                    },
+                    "n_files": {
+                        "N": "5.0"
+                    },
+                    "total_mb": {
+                        "N": "119.1"
+                    },
+                    "bin_pred": {
+                        "N": ""
+                    },
+                    "mem_pred": {
+                        "N": ""
+                    },
+                    "wall_pred": {
+                        "N": ""
+                    },
+                    "ipst": {
+                        "S": "ia2k04010"
+                    },
+                    "timestamp": {
+                        "N": "1620740441"
+                    }
+                }
+            }
+        }
+    ]
+}

@@ -59,3 +59,8 @@ pip-wheel-metadata/
 
 # Mac OSX
 .DS_Store
+
+# test data
+*/other
+*/2021-05-1*/batch.csv
+*packagename
