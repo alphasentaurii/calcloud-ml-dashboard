@@ -36,6 +36,7 @@ docs/_build
 # Packages/installer info
 *.egg
 *.egg-info
+*.eggs
 dist
 build
 eggs
@@ -56,11 +57,11 @@ pip-wheel-metadata/
 .project
 .pydevproject
 .settings
-
+.vscode
 # Mac OSX
 .DS_Store
 
 # test data
 */other
 */2021-05-1*/batch.csv
-*packagename
+packagename

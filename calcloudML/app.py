@@ -7,7 +7,7 @@ import plotly.graph_objs as go
 import cmx, scoring, load_data, features
 
 
-app = dash.Dash(__name__, title="MLDash")
+app = dash.Dash(__name__, title="CalcloudML")
 
 # LOAD MODEL DATA
 timestamps = [1620351000, 1620740441, 1620929899, 1621096666]
@@ -16,12 +16,14 @@ meta = load_data.make_meta(timestamps, versions)
 results = load_data.make_res(meta, versions)
 df_meta = load_data.import_csv(src='file', key='./data/training_metadata.csv')
 
-
 # LOAD DATA AND FIGURES
 df_scores = load_data.get_scores(results)
 acc_fig, loss_fig = scoring.acc_loss_bars(df_scores)
 # history = load_data.load_res_file(meta, "history", "v0", "mem_bin")
 # keras_acc, keras_loss = scoring.keras_plots(history)
+y_true = results['v0']['mem_bin']['y_true']
+y_pred = results['v0']['mem_bin']['y_pred']
+
 cmx_fig = cmx.make_cmx_figure()
 
 # LOAD TRAINING DATASET (for scatterplot)
@@ -30,10 +32,9 @@ feature_list = ['x_files', 'x_size', 'drizcorr', 'pctecorr', 'crsplit',
         'subarray', 'detector', 'dtype', 'instr', 'n_files', 
         'total_mb', 'mem_bin', 'memory', 'wallclock']
 #training_data, instruments = load_data.get_training_data(meta)
-#version_options = version_drop(training_data)
 
 app.layout = html.Div(children=[
-    html.H1('CALCLOUD', style={'padding': 5}),
+    html.H1('CALCLOUD Machine Learning', style={'padding': 5}),
     html.H2('Analytics Dashboard', style={'padding': 5}),
     html.Div(children=[
         html.Div('Model Performance + Statistical Analysis'), 
@@ -68,22 +69,23 @@ app.layout = html.Div(children=[
                 ]),
             
             # KERAS HISTORY
-            'Keras History',
+            html.P('Keras History', style={'margin': 25}),
             html.Div(children=[
-                html.Div([
+                html.Div(children=[
+                    html.Div([
                     dcc.Dropdown(
                         id='version-picker',
                         options=[{'label':str(v),'value':v} for v in versions],
                         value="v0"
-                        )
-                    ], style={
+                        )], style={
                             'color': 'black',
                             'display': 'inline-block',
-                            'float': 'center',               
-                            }),
+                            'float': 'center',
+                            'width': 150,
+                            })
+                    ]),
                 dcc.Graph(
                     id='keras-acc',
-                    #figure=keras_acc,
                     style={
                         'display': 'inline-block',
                         'float': 'center',
@@ -91,38 +93,35 @@ app.layout = html.Div(children=[
                     ),
                 dcc.Graph(
                     id='keras-loss',
-                    #figure=keras_loss,
                     style={
                         'display': 'inline-block',
                         'float': 'center',
                         'padding': 25}
-                    ),
+                    )
                 ]
-            )
-        ],
+            ),
+        # CONFUSION MATRIX
+        html.Div(children=[
+            dcc.Graph(
+                id='confusion-matrix',
+                figure=cmx_fig
+                )], 
+                style={
+                    'color':'white',
+                    'padding': 50,
+                    'display': 'inline-block',
+                    'width': '80%'
+                    }
+                )
+            ], 
         style={
             'color':'white',
             'border':'2px #333 solid', 
             'borderRadius':5,
             'margin': 25,
             'padding': 10
-            }
-        ),
-        # CONFUSION MATRIX
-        html.Div(children=[
-            dcc.Graph(
-                id='confusion-matrix',
-                figure=cmx_fig
-                )
-            ],
-            style={
-                'color':'white',
-                'padding': 50,
-                'display': 'inline-block',
-                'width': '80%'
-                }),
-        ]),
-
+            }),
+    ]),
     html.Div(children=[
         html.H2(children='Exploratory Data Analysis'),
         html.Div([
@@ -178,7 +177,78 @@ app.layout = html.Div(children=[
             'width': '85%'
             }
         )
+        ]),
+    html.Div(children=[
+        html.H2(children='Prediction Testing'),
+        html.Div([
+            html.Div(children=[
+                html.Div(children=[
+                    html.Div('inputs (x)'),
+                    dcc.Dropdown(
+                        id='instr',
+                        options=[{'label': i, 'value': i} for i in instruments],
+                        value='acs',
+                        style={'color': 'black', 'display': 'inline-block', 'float': 'left', 'width': 150,
+                        'margin': 5, 'padding': 5}
+                    ),
+                    dcc.Dropdown(
+                        id='detector',
+                        options=[{'label': 'UVIS', 'value': 'UVIS'},
+                                {'label': 'IR', 'value': 'IR'}],
+                        value='UVIS',
+                        style={'color': 'black', 'display': 'inline-block', 'float': 'left', 'width': 150, 'margin': 5, 'padding': 5} 
+                    ),
+                    dcc.Dropdown(
+                        id='drizcorr',
+                        options=[{'label': 'perform', 'value': 'perform'},
+                                {'label': 'omit', 'value': 'omit'}],
+                        value='perform',
+                        style={'color': 'black', 'display': 'inline-block', 'float': 'left', 'width': 150, 'margin': 5, 'padding': 5}
+                    ),
+                    dcc.Dropdown(
+                        id='pctecorr',
+                        options=[{'label': 'perform', 'value': 'perform'},
+                                {'label': 'omit', 'value': 'omit'}],
+                        value='perform',
+                        style={'color': 'black', 'display': 'inline-block', 'float': 'left', 'width': 150, 'margin': 5, 'padding': 5}
+                    )
+
+                ], style={'width': '20%', 'border':'2px #fff solid', 'display': 'inline-block', 'float': 'left', 'padding': 5}),
+
+                html.Div(children=[
+                    html.Div('hidden layers'),
+                    html.Div(children=[
+                        html.Div('18'),
+                        html.Div('32'),
+                        html.Div('64'),
+                        html.Div('32'),
+                        html.Div('18'),
+                        html.Div('9'),
+                    ])
+
+                ], style={'width': '40%', 'border':'2px #fff solid', 'display': 'inline-block', 'float': 'left', 'padding': 5}),
+
+                html.Div(children=[
+                    html.Div('outputs (y)'),
+                    html.Div(children=[
+                        html.Div('BIN'),
+                        html.Div('GB'),
+                        html.Div('SEC'),        
+                    # dcc.Graph(
+                    #     id='pred-bin'
+                    # ),
+                    # dcc.Graph(
+                    #     id='pred-mem'
+                    # ),
+                    # dcc.Graph(
+                    #     id='pred-wall'
+                    # )
+                ], style={'padding': 5})
+                ], style={'width': '30%', 'border':'2px #fff solid', 'display': 'inline-block', 'float':'left', 'padding': 5})              
+            ])
         ])
+    ], style={'margin': 15})
+    
     ],
     style={
         'backgroundColor':'#1b1f34', 
@@ -198,8 +268,8 @@ app.layout = html.Div(children=[
 
 def update_keras(selected_version):
     history = results[selected_version]['mem_bin']['history']
-    keras_acc, keras_loss = scoring.keras_plots(history)
-    return [keras_acc, keras_loss]
+    keras_figs = scoring.keras_plots(history)
+    return keras_figs
 
 # SCATTER CALLBACK
 @app.callback(

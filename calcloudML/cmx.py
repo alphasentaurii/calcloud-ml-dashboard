@@ -36,14 +36,15 @@ def import_cmx():
         cmx.append(get_confusion_matrix(cmx_filepath))
     return cmx
 
-def normalize_cms(cmx):
-    thresh = 0.5
-    fmt='.2f'
+def normalize_cmx(cmx):
+    # thresh = 0.5
+    # fmt='.2f'
     cmx_norm = cmx.astype('float') / cmx.sum(axis=1)[:, np.newaxis]
     return cmx_norm
 
 def make_cmx_figure():
     cmx = import_cmx()
+    #cmx_norm = normalize_cmx(cmx)
     classes = ['2GB', '8GB', '16GB', '64GB']
     x = classes
     y = x[::-1].copy()

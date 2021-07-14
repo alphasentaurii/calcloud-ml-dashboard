@@ -6,6 +6,21 @@ import plotly.graph_objs as go
 import pandas as pd
 import numpy as np
 
+
+def df_by_instr(df):
+    acs = df[df['instr'] == 0]
+    cos = df[df['instr'] == 1]
+    stis = df[df['instr'] == 2]
+    wfc3 = df[df['instr'] == 3]
+    instr_dict = {
+        'acs': [acs, '#119dff'], 
+        'wfc3': [wfc3, 'salmon'], 
+        'cos': [cos, '#66c2a5'], 
+        'stis': [stis, 'fuchsia']
+        }
+    return instr_dict
+
+
 # m, b = np.polyfit(x, y, 1) #slope, intercept
 # plt.plot(x, m*x + b, 'k--'); # best fit line
 
@@ -28,21 +43,18 @@ import numpy as np
 #     )
 #     fig = go.Figure(data=data, layout=layout)
 
+# mean_memory = df.groupby("dtype").memory.mean()
 
-def df_by_instr(df):
-    acs = df[df['instr'] == 0]
-    cos = df[df['instr'] == 1]
-    stis = df[df['instr'] == 2]
-    wfc3 = df[df['instr'] == 3]
-    instr_dict = {
-        'acs': [acs, '#119dff'], 
-        'wfc3': [wfc3, 'salmon'], 
-        'cos': [cos, '#66c2a5'], 
-        'stis': [stis, 'fuchsia']
-        }
-    return instr_dict
+# print(mean_memory)
 
-    #return acs_scatter, cos_scatter, stis_scatter, wfc3_scatter 
+# #  barplot :
+# sns.barplot(
+#   data=df,
+#   x="dtype",
+#   y="memory",
+# )
+# plt.show()
+
 
 
 # app = dash.Dash()
@@ -158,54 +170,11 @@ def df_by_instr(df):
 #     }
 
 
-
-# def hubble_scatter(df, X, Y='memory', instruments=None, bestfit=False):
-#     fig = plt.figure(figsize=(11,7))
-#     ax = fig.gca()
-
-#     if instruments is None:
-#         ax.scatter(df[X], df[Y])
-#         ax.set_xlabel(X)
-#         ax.set_ylabel(Y)
-#         ax.set_title(f"{X} vs. {Y}")
-#     else:
-#         cols = list(df.columns)
-#         if 'instr' in cols:
-#             instr_col = 'instr'
-#         else:
-#             instr_col = 'instr_enc'
-
-#         for i in instruments:
-#             if i == 'acs':
-#                 e = 0
-#                 c = 'blue'
-#             elif i == 'cos':
-#                 e = 1
-#                 c='lime'
-#             elif i == 'stis':
-#                 e = 2
-#                 c='red'
-#             elif i == 'wfc3':
-#                 e = 3
-#                 c = 'orange'
-#             if instr_col == 'instr':
-#                 ax.scatter((df[X].loc[df[instr_col] == i]), (df[Y].loc[df[instr_col] == i]), c=c, alpha=0.7)
-#             else:
-#                 ax.scatter((df[X].loc[df[instr_col] == e]), (df[Y].loc[df[instr_col] == e]), c=c, alpha=0.7)
- 
-#             ax.set_xlabel(X)
-#             ax.set_ylabel(Y)
-#             ax.set_title(f"{X} vs. {Y}: {[i for i in instruments]}")
-#             if len(instruments) > 1:
-#                 ax.legend([i for i in instruments])
-            
 #     if bestfit is True:
 #         x = df[X]
 #         y = df[Y]
 #         m, b = np.polyfit(x, y, 1) #slope, intercept
 #         plt.plot(x, m*x + b, 'k--'); # best fit line
-#     else:
-#         plt.show();
 
 
 
@@ -255,8 +224,6 @@ def df_by_instr(df):
 
 
 
-
-
 # def resid_plots(res, preds, target, save=False):
 #     fig1 = plt.figure(figsize=(11,7))
 #     ax1 = fig1.gca()
@@ -276,3 +243,138 @@ def df_by_instr(df):
 #     plt.show()
 #     if save is True:
 #         plt.savefig(f'residuals2_{target}.png')
+
+# # Kernel Density Estimates (distplots) for independent variables
+# plt.style.use('seaborn-bright')
+# fig, ax = plt.subplots(ncols=2, nrows=2, figsize=(13,10))
+# sns.distplot(acs['n_files'], ax=ax[0][0], label='acs')
+# sns.distplot(cos['n_files'], ax=ax[0][1], color='lime')
+# sns.distplot(stis['n_files'],ax=ax[1][0], color='red')
+# sns.distplot(wfc3['n_files'],  ax=ax[1][1], color='blue')
+
+# ax[0][0].set_title('ACS')
+# ax[0][1].set_title('COS')
+# ax[1][0].set_title('STIS')
+# ax[1][1].set_title('WFC3')
+
+# fig.tight_layout()
+
+# # Kernel Density Estimates (distplots) for independent variables
+# plt.style.use('seaborn-bright')
+# fig, ax = plt.subplots(ncols=2, nrows=3, figsize=(12,12))
+# sns.distplot(df['drizcorr'], ax=ax[0][0])
+# sns.distplot(df['pctecorr'], ax=ax[0][1])
+# sns.distplot(df['crsplit'], ax=ax[1][0])
+# sns.distplot(df['subarray'], ax=ax[1][1])
+# sns.distplot(df['detector'], ax=ax[2][0])
+# sns.distplot(df['memory'], ax=ax[2][1])
+
+# plt.style.use('seaborn-bright')
+# fig, ax = plt.subplots(ncols=2, figsize=(12,6), sharey=True)
+# sns.barplot(data=acs, x='detector', y='memory', ax=ax[0], order=[0,1])
+# sns.barplot(data=wfc3, x='detector', y='memory', ax=ax[1], order=[0,1])
+# ax[0].set_title('ACS')
+# ax[1].set_title('WFC3')
+# fig.tight_layout()
+
+# plt.style.use('seaborn-bright')
+# fig, ax = plt.subplots(ncols=2, figsize=(12,6), sharey=True)
+# sns.barplot(data=acs, x='pctecorr', y='memory', ax=ax[0], order=[0,1])
+# sns.barplot(data=wfc3, x='pctecorr', y='memory', ax=ax[1], order=[0,1])
+# ax[0].set_title('ACS')
+# ax[1].set_title('WFC3')
+# fig.tight_layout()
+
+
+# plt.style.use('seaborn-bright')
+# fig, ax = plt.subplots(ncols=3, figsize=(12,6), sharey=True)
+# sns.barplot(data=acs, x='crsplit', y='memory', ax=ax[0], order=[0,1,2])
+# sns.barplot(data=stis, x='crsplit', y='memory', ax=ax[1], order=[0,1,2])
+# sns.barplot(data=wfc3, x='crsplit', y='memory', ax=ax[2], order=[0,1,2])
+# ax[0].set_title('ACS')
+# ax[1].set_title('STIS')
+# ax[2].set_title('WFC3')
+# fig.tight_layout()
+
+# fig, ax = plt.subplots(ncols=3, nrows=1, figsize=(12,5))
+# sns.distplot(acs['crsplit'], ax=ax[0], label='acs')
+# sns.distplot(stis['crsplit'], ax=ax[1], label='stis',color='red')
+# sns.distplot(wfc3['crsplit'], ax=ax[2], label='wfc3', color='orange')
+
+# ax[0].set_title('ACS')
+# ax[1].set_title('STIS')
+# ax[2].set_title('WFC3')
+
+
+
+# plt.style.use('seaborn-bright')
+# fig, ax = plt.subplots(ncols=4, figsize=(12,6), sharey=True)
+# sns.barplot(data=acs, x='subarray', y='memory', ax=ax[0], order=[0,1])
+# sns.barplot(data=stis, x='subarray', y='memory', ax=ax[1], order=[0,1])
+# sns.barplot(data=wfc3, x='subarray', y='memory', ax=ax[2], order=[0,1])
+# sns.barplot(data=cos, x='subarray', y='memory', ax=ax[3], order=[0,1])
+# ax[0].set_title('ACS')
+# ax[1].set_title('STIS')
+# ax[2].set_title('WFC3')
+# ax[3].set_title('COS')
+# fig.tight_layout()
+
+
+
+# fig, ax = plt.subplots(ncols=3, nrows=1, figsize=(15,5))
+# sns.distplot(acs['subarray'], ax=ax[0], label='acs')
+# sns.distplot(stis['subarray'], ax=ax[0], label='stis',color='red')
+# sns.distplot(cos['subarray'], ax=ax[1], label='cos', color='lime')
+# sns.distplot(wfc3['subarray'], ax=ax[2], label='wfc3', color='orange')
+
+# ax[0].set_title('ACS, STIS')
+# ax[1].set_title('COS')
+# ax[2].set_title('WFC3')
+
+
+# plt.style.use('seaborn-bright')
+# fig, ax = plt.subplots(ncols=2, nrows=2, figsize=(12,12))
+# sns.barplot(data=acs, x='dtype', y='memory', ax=ax[0][0], order=[1, 0])
+# sns.barplot(data=cos, x='dtype', y='memory', ax=ax[0][1], order=[1, 0])
+# sns.barplot(data=stis, x='dtype', y='memory', ax=ax[1][0], order=[1, 0])
+# sns.barplot(data=wfc3, x='dtype', y='memory', ax=ax[1][1], order=[1, 0])
+# ax[0][0].set_title('ACS')
+# ax[0][1].set_title('COS')
+# ax[1][0].set_title('STIS')
+# ax[1][1].set_title('WFC3')
+# fig.tight_layout()
+
+
+# from scipy.stats import norm
+# plt.figure(figsize=(11,6))
+# sns.distplot(df.memory, fit=norm, label="memory")
+
+# Distribution of memory usage skewed to the right (median is lower than mean).
+# print(df.memory.mean())
+# print(df.memory.median())
+
+# # Kernel Density Estimates (distplots) for independent variables
+# plt.style.use('seaborn-bright')
+# fig, ax = plt.subplots(ncols=2, nrows=2, figsize=(12,12))
+# sns.distplot(acs['memory'], fit=norm, ax=ax[0][0], label='acs')
+# sns.distplot(cos['memory'], fit=norm, ax=ax[0][1], color='lime')
+# sns.distplot(stis['memory'], fit=norm, ax=ax[1][0], color='red')
+# sns.distplot(wfc3['memory'], fit=norm, ax=ax[1][1], color='blue')
+# fig.tight_layout()
+
+
+# # wallclock time vs memory for each instrument
+# plt.style.use('seaborn-bright')
+# fig, ax = plt.subplots(ncols=2, nrows=2, figsize=(12,12))
+# sns.barplot(data=acs, x='mem_bin', y='wallclock', ax=ax[0][0], order=[0,1,2,3])
+# sns.barplot(data=cos, x='mem_bin', y='wallclock', ax=ax[0][1], order=[0,1,2,3])
+# sns.barplot(data=stis, x='mem_bin', y='wallclock', ax=ax[1][0], order=[0,1,2,3])
+# sns.barplot(data=wfc3, x='mem_bin', y='wallclock', ax=ax[1][1], order=[0,1,2,3])
+# ax[0][0].set_title('ACS')
+# ax[0][1].set_title('COS')
+# ax[1][0].set_title('STIS')
+# ax[1][1].set_title('WFC3')
+# fig.tight_layout()
+
+# from keras import utils
+# keras.utils.plot_model(clf)

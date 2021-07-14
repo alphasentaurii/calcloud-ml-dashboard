@@ -23,35 +23,34 @@ Artifical Neural Networks for predicting compute resource requirements for Hubbl
 Install
 -------
 
-Using setup.py:: 
+Using setup.py
 
-    $ git clone https://grit.stsci.edu/rkein/calcloud-machine-learning
+.. code-block:: bash
 
-    $ cd calcloud-machine-learning
+    git clone https://grit.stsci.edu/rkein/calcloud-machine-learning
+    cd calcloud-machine-learning
+    python setup.py install --user
 
-    $ python setup.py install --user
 
+Using virtual env
 
-Using virtual env::
+.. code-block:: bash
 
-    $ git clone https://grit.stsci.edu/rkein/calcloud-machine-learning
-
-    $ python virtualenv dash-venv
-
-    $ source dash-venv/bin/activate
-
-    $ cd calcloud-machine-learning
-
-    $ pip install -r requirements.txt
+    git clone https://grit.stsci.edu/rkein/calcloud-machine-learning
+    python virtualenv dash-venv
+    source dash-venv/bin/activate
+    cd calcloud-machine-learning
+    pip install -r requirements.txt
 
 
 Run
 -------
 Run the flask app::
 
-    $ cd calcloudML
-
-    $ python app.py
+.. code-block:: bash
+    
+    cd calcloudML
+    python app.py
 
 View the running dashboard in your browser: http://127.0.0.1:8050/
 
@@ -61,4 +60,4 @@ View the running dashboard in your browser: http://127.0.0.1:8050/
 License
 -------
 
-See `LICENSE.rst` for more information.
+See ``LICENSE.rst`` for more information.

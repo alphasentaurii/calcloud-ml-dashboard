@@ -1,11 +1,11 @@
 *************************
-packagename Documentation
+calcloudML Documentation
 *************************
 
-This is the documentation for ``packagename``,
-a package which contains stuff that do things.
+This is the documentation for ``calcloud ML``,
+Machine learning analytics dashboard for Calcloud
 
 Reference/API
 =============
 
-.. automodapi:: packagename
+.. automodapi:: calcloudML

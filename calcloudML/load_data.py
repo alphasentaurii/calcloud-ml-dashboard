@@ -88,6 +88,12 @@ def get_history(results, version):
     return results[version]['mem_bin']['history']
 
 
+def get_outcomes(results, version):
+    y_true = results[version]['mem_bin']['y_true']
+    y_pred = results[version]['mem_bin']['y_pred']
+    return y_true, y_pred
+
+
 def dynamodb_data(key):
     #TODO: download from ddb
     csv_file = key
