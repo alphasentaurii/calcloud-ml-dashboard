@@ -180,6 +180,18 @@ app.layout = html.Div(children=[
         ]),
     html.Div(children=[
         html.H2(children='Prediction Testing'),
+        html.Div(children=[
+            html.Div(children=[
+            html.P("Predict Resource Allocation requirements for memory (GB) and max execution `kill time` or `wallclock` (seconds) using three pre-trained neural networks."),
+            html.P("MEMORY BIN: classifier outputs probabilities for each of the four bins (`target classes`). The class with the highest probability score is considered the final predicted outcome (y). This prediction variable represents which of the 4 possible memory bins is most likely to meet the minimum required needs for processing an HST dataset (ipppssoot) successfully according to the given inputs (x)."),
+            html.Div(children=[
+                "Memory Bin Sizes - target class `y`: 0: < 2GB; 1: 2-8GB; 2: 8-16GB; 3: >16GB"
+            ]),
+            html.P("WALLCLOCK REGRESSION: regression generates estimate for specific number of seconds needed to process the dataset using the same input data. This number is then tripled in Calcloud for the sake of creating an extra buffer of overhead in order to prevent larger jobs from being killed unnecessarily."),
+            html.P("MEMORY REGRESSION: A third regression model is used to estimate the actual value of memory needed for the job. This is mainly for the purpose of logging/future analysis and is not currently being used for allocating memory in calcloud jobs."),    
+        ])
+    ]),
+
         html.Div([
             html.Div(children=[
                 html.Div(children=[

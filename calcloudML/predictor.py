@@ -33,31 +33,9 @@ def read_inputs(n_files, total_mb, drizcorr, pctecorr,
         }
     return x_features
 
-# x_features = read_inputs(n_files=10, total_mb=30, drizcorr='perform', pctecorr='perform', crsplit=1.0, subarray='false', detector='UVIS', dtype='ASN', instr='ACS')
-
-# {'n_files': 10,
-#  'total_mb': 30,
-#  'drizcorr': 'perform',
-#  'pctecorr': 'perform',
-#  'crsplit': 1.0,
-#  'subarray': 'false',
-#  'detector': 'UVIS',
-#  'dtype': 'ASN',
-#  'instr': 'ACS'}
-
-# inputs
-# inputs = scrub_keys(x_features)
-# array([10, 30,  1,  1,  2,  0,  1,  1,  0])
-
-# X = transformer(inputs)
-# array([[1.81, 1.14, 1.  , 1.  , 2.  , 0.  , 1.  , 1.  , 0.  ]])
-
-# membin, pred_proba = classifier(clf, X)
-# 0
-# array([[5.72e-01, 4.28e-01, 3.33e-31, 0.00e+00]], dtype=float32)
 
 # input layer
-x = np.array([[7, 20, 0, 0, 0, 1, 0, 0, 0]]).reshape(-1, 1)
+# x = np.array([[7, 20, 0, 0, 0, 1, 0, 0, 0]]).reshape(-1, 1)
 
 #np.array([n_files, total_mb, drizcorr, pctecorr, crsplit, subarray, detector, dtype, instr])
 
@@ -70,12 +48,12 @@ x = np.array([[7, 20, 0, 0, 0, 1, 0, 0, 0]]).reshape(-1, 1)
 # h6 = 9
 
 # output layer
-y = 0
+# y = 0
 
 # outputs
-y1 = ['mem_bin']
-y2 = ['memory']
-y3 = ['wallclock']
+# y1 = ['mem_bin']
+# y2 = ['memory']
+# y3 = ['wallclock']
 
 
 def classifier(model, data):
@@ -178,11 +156,11 @@ class Preprocess:
 
 
 def make_preds(x_features):
-    """Predict Resource Allocation requirements for memory (GB) and max execution `kill time` / `wallclock` (seconds) using three pre-trained neural networks. This lambda is invoked from the Job Submit lambda which json.dumps the s3 bucket and key to the file containing job input parameters. The path to the text file in s3 assumes the following format: `control/ipppssoot/ipppssoot_MemModelFeatures.txt`.
+    """Predict Resource Allocation requirements for memory (GB) and max execution `kill time` / `wallclock` (seconds) using three pre-trained neural networks.
 
-    MEMORY BIN: classifier predicts which of 4 memory bins is most likely to be needed to process an HST dataset (ipppssoot) successfully. The probabilities of each bin are output to Cloudwatch logs and the highest bin probability is returned to the Calcloud job submit lambda invoking this one. Bin sizes are as follows:
+    MEMORY BIN: classifier outputs probabilities for each of the four bins ("target classes"). The class with the highest probability score is considered the final predicted outcome (y). This prediction variable represents which of the 4 possible memory bins is most likely to meet the minimum required needs for processing an HST dataset (ipppssoot) successfully according to the given inputs (x).
 
-    Memory Bins:
+    Memory Bin Sizes (target class "y"):
     0: < 2GB
     1: 2-8GB
     2: 8-16GB
@@ -202,3 +180,27 @@ def make_preds(x_features):
     clocktime = int(regressor(wall_reg, X))
     predictions = {"memBin": membin, "memVal": memval, "clockTime": clocktime}
     return {"predictions": predictions, "probabilities": pred_proba}
+
+
+# x_features = read_inputs(n_files=10, total_mb=30, drizcorr='perform', pctecorr='perform', crsplit=1.0, subarray='false', detector='UVIS', dtype='ASN', instr='ACS')
+
+# {'n_files': 10,
+#  'total_mb': 30,
+#  'drizcorr': 'perform',
+#  'pctecorr': 'perform',
+#  'crsplit': 1.0,
+#  'subarray': 'false',
+#  'detector': 'UVIS',
+#  'dtype': 'ASN',
+#  'instr': 'ACS'}
+
+# inputs
+# inputs = scrub_keys(x_features)
+# array([10, 30,  1,  1,  2,  0,  1,  1,  0])
+
+# X = transformer(inputs)
+# array([[1.81, 1.14, 1.  , 1.  , 2.  , 0.  , 1.  , 1.  , 0.  ]])
+
+# membin, pred_proba = classifier(clf, X)
+# 0
+# array([[5.72e-01, 4.28e-01, 3.33e-31, 0.00e+00]], dtype=float32)
