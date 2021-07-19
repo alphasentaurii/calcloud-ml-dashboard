@@ -4,7 +4,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 import plotly.graph_objs as go
-import cmx, scoring, load_data, features
+import cmx, scoring, load_data, features, roc_auc
 
 
 app = dash.Dash(__name__, title="CalcloudML")
@@ -100,6 +100,32 @@ app.layout = html.Div(children=[
                     )
                 ]
             ),
+        html.P('ROC AUC', style={'margin': 25}),
+        html.P('Receiver Operator Characteristic', style={'margin': 25}),
+        html.P('(Area Under the Curve)', style={'margin': 25}),
+        html.Div(children=[
+            html.Div(children=[
+                html.Div([
+                    dcc.Dropdown(
+                        id='rocauc-picker',
+                        options=[{'label':str(v),'value':v} for v in versions],
+                        value="v0"
+                        )], style={
+                            'color': 'black',
+                            'display': 'inline-block',
+                            'float': 'center',
+                            'width': 150,
+                            })
+                    ]),
+                dcc.Graph(
+                    id='roc-auc',
+                    style={
+                        'display': 'inline-block',
+                        'float': 'center',
+                        'padding': 25}
+                    )
+            ]
+        ),
         # CONFUSION MATRIX
         html.Div(children=[
             dcc.Graph(
@@ -282,6 +308,20 @@ def update_keras(selected_version):
     history = results[selected_version]['mem_bin']['history']
     keras_figs = scoring.keras_plots(history)
     return keras_figs
+
+
+# ROC AUC CALLBACK
+@app.callback(
+    Output('roc-auc', 'figure'),
+    Input('rocauc-picker', 'value')
+)
+
+def update_roc_auc(selected_version):
+    y, y_pred, y_scores = roc_auc.get_pred_proba(results, selected_version)
+    y_onehot = roc_auc.make_dummies(y)
+    fig = roc_auc.make_roc_curve(y, y_onehot, y_scores)
+    return fig
+
 
 # SCATTER CALLBACK
 @app.callback(

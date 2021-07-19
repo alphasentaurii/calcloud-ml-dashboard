@@ -88,10 +88,11 @@ def get_history(results, version):
     return results[version]['mem_bin']['history']
 
 
-def get_outcomes(results, version):
+def get_pred_proba(results, version):
     y_true = results[version]['mem_bin']['y_true']
     y_pred = results[version]['mem_bin']['y_pred']
-    return y_true, y_pred
+    y_proba = results[version]['mem_bin']['proba']
+    return y_true, y_pred, y_proba
 
 
 def dynamodb_data(key):
