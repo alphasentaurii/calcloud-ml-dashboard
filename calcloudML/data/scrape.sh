@@ -5,6 +5,7 @@ BUCKET=calcloud-modeling-sb
 RESCLF=('duration' 'history' 'kfold' 'matrix' 'preds' 'proba' 'scores' 'y_pred' 'y_true')
 RESREG=('duration' 'history' 'kfold' 'predictions' 'residuals' 'scores')
 
+
 for d in "${DATES[@]}"
 do
 	clfpath=`echo ${d}/results/mem_bin`
@@ -25,4 +26,7 @@ do
 		aws s3api get-object --bucket $BUCKET --key ${mempath}/${r} ${mempath}/${r}
 		aws s3api get-object --bucket $BUCKET --key ${wallpath}/${r} ${wallpath}/${r}
 	done
+	
+	model_path=`echo ${d}`
+	aws s3api get-object --bucket $BUCKET --key ${d}/models/models.zip ${model_path}/models.zip
 done

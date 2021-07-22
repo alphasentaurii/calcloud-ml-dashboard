@@ -1,9 +1,10 @@
-# import plotly.graph_objs as go
-# from plotly import subplots
-# from sklearn.metrics import roc_curve, roc_auc_score, auc, precision_score, recall_score, f1_score #plot_precision_recall_curve
-# import numpy as np
-
 # # AUC_ROC Plots
+
+# X = df.drop(columns=['mem_bin', 'memory', 'wallclock'])
+# y_mc = df['mem_bin']
+# y_mr = df['memory']
+# y_wr = df['wallclock']
+
 
 # def classifier(model, data):
 #     """Returns class prediction"""
@@ -16,30 +17,35 @@
 # #     p = tp / (tp + fp)
 # #     r = tp / (tp + fn)
 
+# np.random.seed(0)
+
+# # Artificially add noise to make task harder
+# df = px.data.iris()
+# samples = df.species.sample(n=50, random_state=0)
+# np.random.shuffle(samples.values)
+# df.loc[samples.index, 'species'] = samples.values
+
+
+# # Fit the model
+# model = LogisticRegression(max_iter=200)
+# model.fit(X, y)
+
 
 import plotly.graph_objects as go
 import plotly.express as px
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import roc_curve, roc_auc_score
+from sklearn.metrics import roc_curve, roc_auc_score, precision_recall_curve, auc, average_precision_score
 import load_data
 
-
-
-
-def get_pred_proba(results, version):
-    y = results[version]['mem_bin']['y_true']
-    y_pred = results[version]['mem_bin']['y_pred']
-    y_scores = results[version]['mem_bin']['proba']
-    return y, y_pred, y_scores
 
 def make_dummies(y):
     y_onehot = pd.get_dummies(y, prefix='bin')
     return y_onehot
 
 
-def make_roc_curve(y, y_onehot, y_scores):
+def make_roc_curve(y_onehot, y_scores):
     fig = go.Figure()
     fig.add_shape(
         type='line', line=dict(dash='dash'),
@@ -57,13 +63,59 @@ def make_roc_curve(y, y_onehot, y_scores):
         fig.add_trace(go.Scatter(x=fpr, y=tpr, name=name, mode='lines'))
 
     fig.update_layout(
+        title_text='ROC-AUC',
         xaxis_title='False Positive Rate',
         yaxis_title='True Positive Rate',
         yaxis=dict(scaleanchor="x", scaleratio=1),
         xaxis=dict(constrain='domain'),
-        width=700, height=500
+        width=700, height=500,
+        paper_bgcolor='#242a44',
+        plot_bgcolor='#242a44',
+        font={'color': '#ffffff'}
     )
     return fig
+
+
+def make_pr_curve(y_onehot, y_scores):
+    
+    fig = go.Figure()
+    fig.add_shape(
+        type='line', line=dict(dash='dash'),
+        x0=0, x1=1, y0=1, y1=0
+    )
+
+    for i in range(y_scores.shape[1]):
+        y_true = y_onehot.iloc[:, i]
+        y_score = y_scores[:, i]
+
+        precision, recall, _ = precision_recall_curve(y_true, y_score)
+        auc_score = average_precision_score(y_true, y_score)
+
+        name = f"{y_onehot.columns[i]} (AP={auc_score:.2f})"
+        fig.add_trace(go.Scatter(x=recall, y=precision, name=name, mode='lines'))
+
+    fig.update_layout(
+        title_text='Precision-Recall',
+        xaxis_title='Recall',
+        yaxis_title='Precision',
+        yaxis=dict(scaleanchor="x", scaleratio=1),
+        xaxis=dict(constrain='domain'),
+        width=700, height=500,
+        paper_bgcolor='#242a44',
+        plot_bgcolor='#242a44',
+        font={'color': '#ffffff'}
+    )
+    return fig
+
+
+def make_curves(y, y_scores):
+    y_onehot = make_dummies(y)
+    roc_fig = make_roc_curve(y_onehot, y_scores)
+    pr_fig = make_pr_curve(y_onehot, y_scores)
+    return [roc_fig, pr_fig]
+
+
+
 
 # if __name__ == ('__main__'):
 #     timestamps = [1620351000, 1620740441, 1620929899, 1621096666]
@@ -77,33 +129,6 @@ def make_roc_curve(y, y_onehot, y_scores):
 
 
 
-
-
-
-# np.random.seed(0)
-
-# # Artificially add noise to make task harder
-# df = px.data.iris()
-# samples = df.species.sample(n=50, random_state=0)
-# np.random.shuffle(samples.values)
-# df.loc[samples.index, 'species'] = samples.values
-
-# # Define the inputs and outputs
-# X = df.drop(columns=['species', 'species_id'])
-# y = df['species']
-
-# # Fit the model
-# model = LogisticRegression(max_iter=200)
-# model.fit(X, y)
-# y_scores = model.predict_proba(X)
-# array([[0.84, 0.11, 0.05],
-# One hot encode the labels in order to plot them
-# y_onehot = pd.get_dummies(y, columns=model.classes_)
-
-
-
-# Create an empty figure, and iteratively add new lines
-# every time we compute a new class
 
 
 

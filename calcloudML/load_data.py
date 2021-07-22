@@ -134,6 +134,13 @@ def get_instruments(df):
     return df
 
 
+def split_df_by_timestamp(df, meta):
+    dates = [meta[i]['date'] for i, _ in meta.items()]
+    df0 = df.loc[df['timestamp'] == dates[0]]
+    df1 = df.loc[df['timestamp'] == dates[1]]
+    df2 = df.loc[df['timestamp'] == dates[2]]
+
+
 def get_training_data(meta):
     dates = [meta[i]['date'] for i, _ in meta.items()]
     batches = [f"./data/{d}/batch.csv" for d in dates]
@@ -147,12 +154,8 @@ def get_training_data(meta):
     training_data = pd.concat([d for d in training_list], verify_integrity=False)
     return training_data, instruments
 
-def get_single_dataset(meta, version=None):
-    if version is None: # get most recent
-        date = [meta[i]['date'] for i, _ in meta.items()][-1]
-    else:
-        date = meta[version]['date']
-    data = pd.read_csv(f"./data/{date}/batch.csv")
-    df = get_instruments(data)
-    instruments = list(df['instr_key'].unique())
-    return df, instruments
+def get_single_dataset(filename):
+    data = pd.read_csv(filename)
+    data.set_index('ipst', drop=False, inplace=True)
+    df = get_instruments(data) # adds instrument label (string)
+    return df

@@ -3,15 +3,14 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-import plotly.graph_objs as go
 import cmx, scoring, load_data, features, roc_auc
 
 
 app = dash.Dash(__name__, title="CalcloudML")
 
 # LOAD MODEL DATA
-timestamps = [1620351000, 1620740441, 1620929899, 1621096666]
-versions = ["v0", "v1", "v2", "v3"]
+timestamps = [1620740441, 1620929899, 1621096666]
+versions = ["v0", "v1", "v2"]
 meta = load_data.make_meta(timestamps, versions)
 results = load_data.make_res(meta, versions)
 df_meta = load_data.import_csv(src='file', key='./data/training_metadata.csv')
@@ -19,19 +18,15 @@ df_meta = load_data.import_csv(src='file', key='./data/training_metadata.csv')
 # LOAD DATA AND FIGURES
 df_scores = load_data.get_scores(results)
 acc_fig, loss_fig = scoring.acc_loss_bars(df_scores)
-# history = load_data.load_res_file(meta, "history", "v0", "mem_bin")
-# keras_acc, keras_loss = scoring.keras_plots(history)
-y_true = results['v0']['mem_bin']['y_true']
-y_pred = results['v0']['mem_bin']['y_pred']
 
-cmx_fig = cmx.make_cmx_figure()
 
 # LOAD TRAINING DATASET (for scatterplot)
-df, instruments = load_data.get_single_dataset(meta, "v0")
+df = load_data.get_single_dataset('data/hst_data.csv')
+instruments = list(df['instr_key'].unique())
 feature_list = ['x_files', 'x_size', 'drizcorr', 'pctecorr', 'crsplit', 
         'subarray', 'detector', 'dtype', 'instr', 'n_files', 
         'total_mb', 'mem_bin', 'memory', 'wallclock']
-#training_data, instruments = load_data.get_training_data(meta)
+
 
 app.layout = html.Div(children=[
     html.H1('CALCLOUD Machine Learning', style={'padding': 5}),
@@ -122,23 +117,43 @@ app.layout = html.Div(children=[
                     style={
                         'display': 'inline-block',
                         'float': 'center',
-                        'padding': 25}
-                    )
+                        'padding': 25
+                        }),
+                dcc.Graph(
+                    id='precision-recall-fig',
+                    style={
+                        'display': 'inline-block',
+                        'float': 'center',
+                        'padding': 25
+                        })
             ]
         ),
         # CONFUSION MATRIX
         html.Div(children=[
-            dcc.Graph(
-                id='confusion-matrix',
-                figure=cmx_fig
-                )], 
-                style={
-                    'color':'white',
-                    'padding': 50,
-                    'display': 'inline-block',
-                    'width': '80%'
-                    }
-                )
+            html.Div([
+                dcc.Dropdown(
+                    id='cmx-type',
+                    options=[
+                        {'label': 'counts', 'value': 'counts'},
+                        {'label': 'normalized', 'value': 'normalized'}
+                        ],
+                    value="normalized"
+                        )], style={
+                            'color': 'black',
+                            'display': 'inline-block',
+                            'float': 'center',
+                            'width': 150,
+                            }),
+                dcc.Graph(
+                    id='confusion-matrix',
+                    )],
+                    style={
+                        'color':'white',
+                        'padding': 50,
+                        'display': 'inline-block',
+                        'width': '80%'
+                        }
+                    )
             ], 
         style={
             'color':'white',
@@ -312,15 +327,26 @@ def update_keras(selected_version):
 
 # ROC AUC CALLBACK
 @app.callback(
-    Output('roc-auc', 'figure'),
+    [Output('roc-auc', 'figure'),
+    Output('precision-recall-fig', 'figure')],
     Input('rocauc-picker', 'value')
 )
 
 def update_roc_auc(selected_version):
-    y, y_pred, y_scores = roc_auc.get_pred_proba(results, selected_version)
-    y_onehot = roc_auc.make_dummies(y)
-    fig = roc_auc.make_roc_curve(y, y_onehot, y_scores)
-    return fig
+    y = results[selected_version]['mem_bin']['y_true']
+    y_scores = results[selected_version]['mem_bin']['proba']
+    roc_figs = roc_auc.make_curves(y, y_scores)
+    return roc_figs
+
+
+@app.callback(
+    Output('confusion-matrix', 'figure'),
+    Input('cmx-type', 'value')
+)
+
+def update_cmx(cmx_type):
+    cmx_fig = cmx.make_cmx_figure(results, cmx_type)
+    return cmx_fig
 
 
 # SCATTER CALLBACK
