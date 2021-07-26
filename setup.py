@@ -34,4 +34,4 @@ if 'build_docs' in sys.argv or 'build_sphinx' in sys.argv:
 # ``setup``, since these are now deprecated. See this link for more details:
 # https://groups.google.com/forum/#!topic/astropy-dev/urYO8ckB2uM
 
-setup(use_scm_version={'write_to': 'packagename/version.py'})
+setup(use_scm_version={'write_to': 'calcloudML/version.py'})

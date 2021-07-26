@@ -1,24 +1,26 @@
-import plotly.graph_objs as go
 import dash
+
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
-import cmx, scoring, load_data, features, roc_auc
+import dash_cytoscape as cyto
+import flask
+#from . import makefigs
+from makefigs import cmx, scoring, load_data, roc_auc, features
 
-
-app = dash.Dash(__name__, title="CalcloudML")
+app = dash.Dash(__name__, title="CalcloudML", suppress_callback_exceptions=True)
+# server = app.server
 
 # LOAD MODEL DATA
 timestamps = [1620740441, 1620929899, 1621096666]
 versions = ["v0", "v1", "v2"]
 meta = load_data.make_meta(timestamps, versions)
 results = load_data.make_res(meta, versions)
-df_meta = load_data.import_csv(src='file', key='./data/training_metadata.csv')
+# df_meta = load_data.import_csv(src='file', key='./data/training_metadata.csv')
 
 # LOAD DATA AND FIGURES
 df_scores = load_data.get_scores(results)
 acc_fig, loss_fig = scoring.acc_loss_bars(df_scores)
-
 
 # LOAD TRAINING DATASET (for scatterplot)
 df = load_data.get_single_dataset('data/hst_data.csv')
@@ -27,16 +29,57 @@ feature_list = ['x_files', 'x_size', 'drizcorr', 'pctecorr', 'crsplit',
         'subarray', 'detector', 'dtype', 'instr', 'n_files', 
         'total_mb', 'mem_bin', 'memory', 'wallclock']
 
+acs = df.groupby('instr').get_group(0)
+cos = df.groupby('instr').get_group(1)
+stis = df.groupby('instr').get_group(2)
+wfc3 = df.groupby('instr').get_group(3)
 
-app.layout = html.Div(children=[
-    html.H1('CALCLOUD Machine Learning', style={'padding': 5}),
-    html.H2('Analytics Dashboard', style={'padding': 5}),
+url_bar_and_content_div = html.Div([
+    dcc.Location(id='url', refresh=False),
+    html.Div(id='page-content')
+])
+
+layout_index = html.Div(children=[
+    html.Br(),
+    html.H1('CALCLOUD', 
+        style={'padding': 15}),
+    html.H2('Machine Learning Dashboard'),
     html.Div(children=[
         html.Div('Model Performance + Statistical Analysis'), 
-        html.Div('for the Hubble Space Telescope\'s data reprocessing pipeline.')], style={'display': 'inline-block'}),
+        html.Div('for the Hubble Space Telescope\'s'),
+        html.Div('data reprocessing pipeline.')], style={'display': 'inline-block'}),
+        html.Div([
+            html.Br(),
+            dcc.Link('Model Performance Evaluation', href='/page-1'),
+            html.Br(),
+            dcc.Link('Exploratory Data Analysis', href='/page-2'),
+            html.Br(),
+            dcc.Link('Neural Network Graph', href='/page-3')
+            ]
+            )],
+         style={
+        'backgroundColor':'#1b1f34', 
+        'color':'white',
+        'textAlign': 'center',
+        'width': '80%',
+        'display': 'inline-block',
+        'float': 'center',
+        'padding': '10%',
+        })
+
+
+layout_page_1 = html.Div(children=[
+    html.Div(children=[
+        html.Br(),
+        dcc.Link('Home', href='/'),
+        html.Br(),
+        dcc.Link('Exploratory Data Analysis', href='/page-2'),
+        html.Br(),
+        dcc.Link('Neural Network Graph', href='/page-3'),
+        html.Br()
+        ]),
     html.Div(children=[
         html.H3('Model Performance'),
-
         # MEMORY CLASSIFIER CHARTS
         html.Div(children=[
             html.H4(children='Memory Bin Classifier', style={'padding': 10}),
@@ -162,13 +205,30 @@ app.layout = html.Div(children=[
             'margin': 25,
             'padding': 10
             }),
-    ]),
+    ])],
+    style={
+        'backgroundColor':'#1b1f34', 
+        'color':'white',
+        'textAlign': 'center',
+        'width': '100%',
+        'display': 'inline-block',
+        'float': 'center'
+        })
+
+
+layout_page_2 = html.Div(children=[
     html.Div(children=[
-        html.H2(children='Exploratory Data Analysis'),
-        html.Div([
-            # FEATURE COMPARISON SCATTERPLOTS
-            html.Div(children=[
-                html.Div(children=[
+        html.Br(),
+        dcc.Link('Home', href='/'),
+        html.Br(),
+        dcc.Link('Model Performance Evaluation', href='/page-1'),
+        html.Br(),
+        dcc.Link('Neural Network Graph', href='/page-3'),
+        html.Br()
+        ]),
+        html.Div(children=[
+        # FEATURE COMPARISON SCATTERPLOTS
+        html.Div(children=[
                 html.Div([
                     dcc.Dropdown(
                         id='xaxis-features',
@@ -203,38 +263,83 @@ app.layout = html.Div(children=[
                     style={
                         'display': 'inline-block',
                         'float': 'center'
-                        }),
+                        })
             ],
             style={
                 'color':'white',
                 'width': '100%'}
-                )
-            ],
+                ),
+        # BOX PLOTS: CONTINUOUS VARS (N_FILES + TOTAL_MB)
+        html.Div(children=[
+            html.Div(children=[
+                html.Div(children=[
+                html.Div([
+                    dcc.Dropdown(
+                        id='continuous-vars',
+                        options=[{'label': 'Raw Data', 'value': 'raw'},
+                        {'label': 'Normalized', 'value': 'norm'}],
+                        value='raw'
+                    )], 
+                    style={
+                        'width': '40%', 
+                        'display': 'inline-block', 
+                        'padding': 5, 
+                        'float': 'center',
+                        'color': 'black'})
+                    ]),
+                dcc.Graph(
+                    id='n_files',
+                    style={
+                        'display': 'inline-block',
+                        'float': 'center',
+                        'width': '50%'
+                        }),
+                dcc.Graph(
+                    id='total_mb',
+                    style={
+                        'display': 'inline-block',
+                        'float': 'center',
+                        'width': '50%'
+                        })
+            ], style={
+                'color':'white',
+                'width': '100%'})
+        ], 
         style={
+            'backgroundColor': '#242a44', 
+            'color':'white', 
+            'padding':15, 
+            'display': 'inline-block', 
+            'width': '85%'
+            })
+
+        ], style={
             'backgroundColor': '#242a44', 
             'color':'white', 
             'padding':20, 
             'display': 'inline-block', 
-            'width': '85%'
-            }
-        )
-        ]),
-    html.Div(children=[
-        html.H2(children='Prediction Testing'),
-        html.Div(children=[
-            html.Div(children=[
-            html.P("Predict Resource Allocation requirements for memory (GB) and max execution `kill time` or `wallclock` (seconds) using three pre-trained neural networks."),
-            html.P("MEMORY BIN: classifier outputs probabilities for each of the four bins (`target classes`). The class with the highest probability score is considered the final predicted outcome (y). This prediction variable represents which of the 4 possible memory bins is most likely to meet the minimum required needs for processing an HST dataset (ipppssoot) successfully according to the given inputs (x)."),
-            html.Div(children=[
-                "Memory Bin Sizes - target class `y`: 0: < 2GB; 1: 2-8GB; 2: 8-16GB; 3: >16GB"
-            ]),
-            html.P("WALLCLOCK REGRESSION: regression generates estimate for specific number of seconds needed to process the dataset using the same input data. This number is then tripled in Calcloud for the sake of creating an extra buffer of overhead in order to prevent larger jobs from being killed unnecessarily."),
-            html.P("MEMORY REGRESSION: A third regression model is used to estimate the actual value of memory needed for the job. This is mainly for the purpose of logging/future analysis and is not currently being used for allocating memory in calcloud jobs."),    
-        ])
-    ]),
+            'width': '100%',
+            'textAlign': 'center'
+            })
 
-        html.Div([
-            html.Div(children=[
+
+
+layout_page_3 = html.Div(children=[
+    # nav
+        html.Div(children=[
+            html.Br(),
+            dcc.Link('Home', href='/'),
+            html.Br(),
+            dcc.Link('Model Performance Evaluation', href='/page-1'),
+            html.Br(),
+            dcc.Link('Exploratory Data Analysis', href='/page-2'),
+            html.Br()
+            ]),
+html.Div(children=[
+        html.H2(children='Prediction Testing'),
+        # NEURAL GRAPH
+        html.Div(children=[
+                # X (inputs)
                 html.Div(children=[
                     html.Div('inputs (x)'),
                     dcc.Dropdown(
@@ -266,22 +371,59 @@ app.layout = html.Div(children=[
                         style={'color': 'black', 'display': 'inline-block', 'float': 'left', 'width': 150, 'margin': 5, 'padding': 5}
                     )
 
-                ], style={'width': '20%', 'border':'2px #fff solid', 'display': 'inline-block', 'float': 'left', 'padding': 5}),
-
+                ], 
+                style={
+                    'width': '20%', 
+                    'border':'2px #fff solid', 
+                    'display': 'inline-block', 
+                    'float': 'left', 
+                    'padding': 5}), 
+                    # END X (inputs)
+                # HIDDEN LAYER NODES
                 html.Div(children=[
-                    html.Div('hidden layers'),
+                    html.Div('hidden layers', style={'width': '100%'}),
                     html.Div(children=[
-                        html.Div('18'),
-                        html.Div('32'),
-                        html.Div('64'),
-                        html.Div('32'),
-                        html.Div('18'),
-                        html.Div('9'),
-                    ])
+                        cyto.Cytoscape(
+                            id='cytoscape-two-nodes',
+                            layout={'name': 'preset'},
+                            style={'width': '400px', 'height': '400px', 'display': 'inline-block', 'float': 'center'},
+                            elements=[
+                                {
+                                    'data': {'id': 'one', 'label': 'Node 1'}, 
+                                    'position': {'x': 75, 'y': 75}
+                                },
+                                {
+                                    'data': {'id': 'two', 'label': 'Node 2'}, 
+                                    'position': {'x': 200, 'y': 200}
+                                },
+                                {
+                                    'data': {'source': 'one', 'target': 'two'}
+                                }
+                            ]) 
+                        ],
+                        style={
+                            'display': 'inline-block',
+                            'float': 'left',
+                            'width': '100%'
+                            }
+                        )], 
+                        style={
+                            'width': '50%', 
+                            'border':'2px #fff solid', 
+                            'display': 'inline-block', 
+                            'float': 'left', 
+                            'padding': 5}),
+                            
+                        # html.Div('18'),
+                        # html.Div('32'),
+                        # html.Div('64'),
+                        # html.Div('32'),
+                        # html.Div('18'),
+                        # html.Div('9'),
 
-                ], style={'width': '40%', 'border':'2px #fff solid', 'display': 'inline-block', 'float': 'left', 'padding': 5}),
+                 # END HIDDEN LAYER NODES
 
-                html.Div(children=[
+                html.Div(children=[ # OUTPUTS
                     html.Div('outputs (y)'),
                     html.Div(children=[
                         html.Div('BIN'),
@@ -297,13 +439,38 @@ app.layout = html.Div(children=[
                     #     id='pred-wall'
                     # )
                 ], style={'padding': 5})
-                ], style={'width': '30%', 'border':'2px #fff solid', 'display': 'inline-block', 'float':'left', 'padding': 5})              
-            ])
-        ])
-    ], style={'margin': 15})
-    
-    ],
-    style={
+                ], style={'width': '20%', 'border':'2px #fff solid', 'display': 'inline-block', 'float':'left', 'padding': 5}
+                # END OUTPUTS
+        )
+        ], style={'margin': 15}) # END NEURAL GRAPH
+    ]),
+    # SUMMARY TEXT
+    html.Div(children=[
+        html.Div(children=[
+            html.P("Predict Resource Allocation requirements for memory (GB) and max execution `kill time` or `wallclock` (seconds) using three pre-trained neural networks."),
+            html.Br(),
+            html.P("MEMORY BIN: classifier outputs probabilities for each of the four bins (`target classes`). The class with the highest probability score is considered the final predicted outcome (y). This prediction variable represents which of the 4 possible memory bins is most likely to meet the minimum required needs for processing an HST dataset (ipppssoot) successfully according to the given inputs (x)."),
+            html.Div(children=[
+                html.P("Memory Bin Sizes - target class `y`:"),
+                html.Li("0: < 2GB"),
+                html.Li("1: 2-8GB"),
+                html.Li("2: 8-16GB"),
+                html.Li("3: >16GB"),
+            ]),
+            html.Br(),
+            html.P("WALLCLOCK REGRESSION: regression generates estimate for specific number of seconds needed to process the dataset using the same input data. This number is then tripled in Calcloud for the sake of creating an extra buffer of overhead in order to prevent larger jobs from being killed unnecessarily."),
+            html.Br(),
+            html.P("MEMORY REGRESSION: A third regression model is used to estimate the actual value of memory needed for the job. This is mainly for the purpose of logging/future analysis and is not currently being used for allocating memory in calcloud jobs."),    
+            ],
+            style={
+                'width': '50%',
+                'display': 'inline-block',
+                'float': 'center',
+                'padding': 15
+            })
+        ]), # END SUMMARY TEXT
+# PAGE LAYOUT
+], style={
         'backgroundColor':'#1b1f34', 
         'color':'white',
         'textAlign': 'center',
@@ -312,6 +479,35 @@ app.layout = html.Div(children=[
         'float': 'center'
         })
 
+
+
+# index layout
+app.layout = url_bar_and_content_div
+
+# "complete" layout
+app.validation_layout = html.Div([
+    url_bar_and_content_div,
+    layout_index,
+    layout_page_1,
+    layout_page_2,
+    layout_page_3
+])
+
+# Index callbacks
+@app.callback(Output('page-content', 'children'),
+              Input('url', 'pathname'))
+def display_page(pathname):
+    if pathname == "/page-1":
+        return layout_page_1
+    elif pathname == "/page-2":
+        return layout_page_2
+    elif pathname == "/page-3":
+        return layout_page_3
+    else:
+        return layout_index
+
+
+# Page 1 callbacks
 # KERAS CALLBACK
 @app.callback(
     [Output('keras-acc', 'figure'),
@@ -349,6 +545,7 @@ def update_cmx(cmx_type):
     return cmx_fig
 
 
+# Page 2 callbacks
 # SCATTER CALLBACK
 @app.callback(
 [Output('acs-scatter', 'figure'),
@@ -361,31 +558,32 @@ Input('yaxis-features', 'value')])
 
 def update_scatter(xaxis_name, yaxis_name):
     instr_dict = features.df_by_instr(df)
-    scatter_figs = []
-    for instr, (data, color) in instr_dict.items():
-        trace = go.Scatter(
-                x=data[xaxis_name],
-                y=data[yaxis_name],
-                text=data['ipst'],
-                mode='markers',
-                opacity=0.7,
-                marker={'size': 15, 'color': color},
-                name=instr
-            )
-        layout = go.Layout(
-            xaxis={'title': xaxis_name},
-            yaxis={'title': yaxis_name},
-            title=instr,
-            #margin={'l': 40, 'b': 40, 't': 10, 'r': 0},
-            hovermode='closest',
-            paper_bgcolor='#242a44',
-            plot_bgcolor='#242a44',
-            font={'color': '#ffffff'},
-        )
-        fig=go.Figure(data=trace, layout=layout)
-        scatter_figs.append(fig)
+    scatter_figs = features.make_scatter_figs(instr_dict, xaxis_name, yaxis_name)
     return scatter_figs
 
 
+@app.callback(
+    [Output('n_files', 'figure'),
+    Output('total_mb', 'figure')],
+    Input('continuous-vars', 'value')
+)
+
+def update_continuous(raw_norm):
+    if raw_norm == 'raw':
+        vars = ['n_files', 'total_mb']
+    elif raw_norm == 'norm':
+        vars = ['x_files', 'x_size']
+    continuous_figs = features.make_continuous_figs(acs, cos, stis, wfc3, vars)
+    return continuous_figs
+# @app.callback(Output('page-2-display-value', 'children'),
+#               Input('page-2-dropdown', 'value'))
+# def display_value(value):
+#     print('display_value')
+#     return 'You have selected "{}"'.format(value)
+
+
+# PAGE 3 CALLBACKS
+
+
 if __name__ == '__main__':
-    app.run_server(debug=True, dev_tools_hot_reload=True)
+    app.run_server(debug=True)

@@ -27,8 +27,8 @@ Using setup.py
 
 .. code-block:: bash
 
-    git clone https://grit.stsci.edu/rkein/calcloud-machine-learning
-    cd calcloud-machine-learning
+    git clone https://grit.stsci.edu/rkein/calcloud-ml-dashboard
+    cd calcloud-ml-dashboard
     python setup.py install --user
 
 
@@ -36,15 +36,16 @@ Using virtual env
 
 .. code-block:: bash
 
-    git clone https://grit.stsci.edu/rkein/calcloud-machine-learning
+    git clone https://grit.stsci.edu/rkein/calcloud-ml-dashboard
     python virtualenv dash-venv
     source dash-venv/bin/activate
-    cd calcloud-machine-learning
+    cd calcloud-ml-dashboard
     pip install -r requirements.txt
 
 
 Run
 -------
+
 Run the flask app::
 
 .. code-block:: bash
