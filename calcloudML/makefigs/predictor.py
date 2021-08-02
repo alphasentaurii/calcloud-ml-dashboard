@@ -7,6 +7,7 @@
 import numpy as np
 from sklearn.preprocessing import PowerTransformer
 import tensorflow as tf
+import pickle
 
 def get_model(model_path):
     """Loads pretrained Keras functional model"""
@@ -15,8 +16,9 @@ def get_model(model_path):
 
 # load models
 clf = get_model("./models/mem_clf/")
-mem_reg = get_model("./models/mem_reg/")
+mem_reg = get_model("./data/2021-05-11-1620740441/models/mem_reg/")
 wall_reg = get_model("./models/wall_reg/")
+
 
 def read_inputs(n_files, total_mb, drizcorr, pctecorr, 
     crsplit, subarray, detector, dtype, instr):
@@ -73,6 +75,12 @@ class Preprocess:
     def __init__(self, x_features):
         self.x_features = x_features
         self.inputs = None
+        self.lambdas = None
+        self.f_mean = None
+        self.f_sigma = None
+        self.s_mean = None
+        self.s_sigma = None
+
 
     def scrub_keys(self):
         n_files = 0
@@ -94,29 +102,29 @@ class Preprocess:
                 else:
                     detector = 0
             if k == "subarray":
-                if v == "true":
+                if v == "TRUE":
                     subarray = 1
                 else:
                     subarray = 0
             if k == "drizcorr":
-                if v == "perform":
+                if v == "PERFORM":
                     drizcorr = 1
                 else:
                     drizcorr = 0
             if k == "pctecorr":
-                if v == "perform":
+                if v == "PERFORM":
                     pctecorr = 1
                 else:
                     pctecorr = 0
             if k == "crsplit":
-                if v == "NaN":
+                if v == 0:
                     crsplit = 0
-                elif v == "1.0":
+                elif v == 1:
                     crsplit = 1
                 else:
                     crsplit = 2
             if k == "dtype":
-                if v == 'ASN':
+                if v == 'ASSOCIATION':
                     dtype = 1
                 else:
                     dtype = 0
@@ -133,6 +141,27 @@ class Preprocess:
         inputs = np.array([n_files, total_mb, drizcorr, pctecorr, crsplit, subarray, detector, dtype, instr])
         return inputs
 
+    
+    def load_pt_data(self, pt_file='./data/pt_transform'):
+        with open(pt_file, 'rb') as pick:
+            pt_data = pickle.load(pick)
+        
+        self.lambdas = np.array([pt_data['lambdas'][0], pt_data['lambdas'][1]])
+        self.f_mean = pt_data['f_mean']
+        self.f_sigma = pt_data['f_sigma']
+        self.s_mean = pt_data['s_mean']
+        self.s_sigma = pt_data['s_sigma']
+        
+        return self
+
+
+
+# {'lambdas': array([-1.80648272,  0.0026787 ]),
+#  'f_mean': 0.4992818949480044,
+#  'f_sigma': 0.029090406850771935,
+#  's_mean': 2.5497485350443014,
+#  's_sigma': 1.5009046818802525}
+    
     def transformer(self):
         """applies yeo-johnson power transform to first two indices of array (n_files, total_mb) using lambdas, mean and standard deviation calculated for each variable prior to model training.
 
@@ -144,13 +173,14 @@ class Preprocess:
         # apply power transformer normalization to continuous vars
         x = np.array([[n_files], [total_mb]]).reshape(1, -1)
         pt = PowerTransformer(standardize=False)
-        pt.lambdas_ = np.array([-1.51, -0.12])
+        pt.lambdas_ = self.lambdas #-1.80648272,  0.0026787
+        #pt.lambdas_ = np.array([-1.51, -0.12])
         xt = pt.transform(x)
         # normalization (zero mean, unit variance)
-        f_mean, f_sigma = 0.5682815234265285, 0.04222565843608133
-        s_mean, s_sigma = 1.6250374589283951, 1.0396138451086632
-        x_files = np.round(((xt[0, 0] - f_mean) / f_sigma), 5)
-        x_size = np.round(((xt[0, 1] - s_mean) / s_sigma), 5)
+        # f_mean, f_sigma = 0.5682815234265285, 0.04222565843608133
+        #s_mean, s_sigma = 1.6250374589283951, 1.0396138451086632
+        x_files = np.round(((xt[0, 0] - self.f_mean) / self.f_sigma), 5)
+        x_size = np.round(((xt[0, 1] - self.s_mean) / self.s_sigma), 5)
         X = np.array([x_files, x_size, X[2], X[3], X[4], X[5], X[6], X[7], X[8]]).reshape(1, -1)
         return X
 
@@ -172,6 +202,7 @@ def make_preds(x_features):
     """
     prep = Preprocess(x_features)
     prep.inputs = prep.scrub_keys()
+    prep.load_pt_data()
     X = prep.transformer()
     # Predict Memory Allocation (bin and value preds)
     membin, pred_proba = classifier(clf, X)
