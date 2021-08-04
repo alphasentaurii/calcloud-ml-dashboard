@@ -5,4 +5,8 @@ from .load_data import *
 from .roc_auc import *
 from .scoring import *
 from .clf_weights import *
-#from .predictor import *
+from .predictor import *
+from .nodegraph import *
+
+
+

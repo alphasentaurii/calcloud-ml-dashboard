@@ -15,9 +15,9 @@ def get_model(model_path):
     return model
 
 # load models
-clf = get_model("./models/mem_clf/")
-mem_reg = get_model("./data/2021-05-11-1620740441/models/mem_reg/")
-wall_reg = get_model("./models/wall_reg/")
+# clf = get_model("./models/mem_clf/")
+# mem_reg = get_model("./models/mem_reg/")
+# wall_reg = get_model("./models/wall_reg/")
 
 
 def read_inputs(n_files, total_mb, drizcorr, pctecorr, 
@@ -185,7 +185,7 @@ class Preprocess:
         return X
 
 
-def make_preds(x_features):
+def make_preds(x_features, NN=None):
     """Predict Resource Allocation requirements for memory (GB) and max execution `kill time` / `wallclock` (seconds) using three pre-trained neural networks.
 
     MEMORY BIN: classifier outputs probabilities for each of the four bins ("target classes"). The class with the highest probability score is considered the final predicted outcome (y). This prediction variable represents which of the 4 possible memory bins is most likely to meet the minimum required needs for processing an HST dataset (ipppssoot) successfully according to the given inputs (x).
@@ -200,19 +200,96 @@ def make_preds(x_features):
 
     MEMORY REGRESSION: A third regression model is used to estimate the actual value of memory needed for the job. This is mainly for the purpose of logging/future analysis and is not currently being used for allocating memory in calcloud jobs.
     """
+    global clf
+    global mem_reg
+    if NN is None:
+        clf = get_model('./models/mem_clf')
+        mem_reg = get_model("./models/mem_reg/")
+        #wall_reg = get_model("./models/wall_reg/")
+    else:
+        clf = NN['clf']
+        mem_reg = NN['mem_reg']
     prep = Preprocess(x_features)
     prep.inputs = prep.scrub_keys()
     prep.load_pt_data()
     X = prep.transformer()
     # Predict Memory Allocation (bin and value preds)
     membin, pred_proba = classifier(clf, X)
+    P = pred_proba[0]
+    p0, p1, p2, p3 = P[0], P[1], P[2], P[3]
     memval = np.round(float(regressor(mem_reg, X)), 2)
     # Predict Wallclock Allocation (execution time in seconds)
-    clocktime = int(regressor(wall_reg, X))
-    predictions = {"memBin": membin, "memVal": memval, "clockTime": clocktime}
-    return {"predictions": predictions, "probabilities": pred_proba}
+    # clocktime = int(regressor(wall_reg, X))
+    # predictions = {"memBin": membin, "memVal": memval, "clockTime": clocktime}
+    # return {"predictions": predictions, "probabilities": pred_proba}
+    memory_predictions = [membin, memval, p0, p1, p2, p3]
+    return memory_predictions
+
+        # predictions = {"memBin": membin, "memVal": memval, "clockTime": clocktime}
+        #{"predictions": predictions, "probabilities": pred_proba}
+        # membin = output_preds['predictions']['memBin']
+        # memval = output_preds['predictions']['memVal']
+        # proba = output_preds['probabilities'][0]
+
+        
 
 
+# input_arr = np.array([1.847015, 2.705386, 1, 1, 2, 0, 1, 1, 3])
+def single_neuron(layer_num, input_arr, neuron):
+    # get weights for each neuron
+    w_dense = np.array(clf.layers[layer_num].weights[0])
+    weights = [w[neuron] for w in w_dense]
+    # get bias values
+    b = np.array(clf.layers[layer_num].bias)[neuron]
+    wxb = np.sum(weights * input_arr) + b
+    n = np.max([0, wxb])
+    
+    return n # 1.4060400382443516
+
+def layer_neurons(layer_num, input_arr):
+    w_dense = np.array(clf.layers[layer_num].weights[0])
+    n_neurons = w_dense.shape[1]
+    neuron_values = []
+    for n in list(range(n_neurons)):
+        s = single_neuron(layer_num, input_arr, n)
+        neuron_values.append(s)
+    return np.array(neuron_values)
+
+def calculate_neurons(input_arr):
+    # n_layers = len(clf.layers)
+    # neurons = []
+    # count = 1
+    # for L in list(range(1, n_layers)):
+    #     if count == 1:
+    #         input_arr = input_arr
+    #     else:
+    #         input_arr = neurons[count-1]
+    #     N = layer_neurons(L, input_arr)
+    #     neurons.append(N)
+    #     count+=1
+    n1 = layer_neurons(1, input_arr)
+    n2 = layer_neurons(2, n1)
+    n3 = layer_neurons(3, n2)
+    n4 = layer_neurons(4, n3)
+    n5 = layer_neurons(5, n4)
+    n6 = layer_neurons(6, n5)
+    n7 = layer_neurons(7, n6)
+    neurons = [n1, n2, n3, n4, n5, n6, n7]
+    return neurons
+
+def softmax_activation(neurons):
+    # array([8533.97208947, 7670.27113491, 1830.08351255, 2598.71759253])
+    out = neurons[-1]
+    e0 = out[0]**out[0]
+    e1 = out[1]**out[1]
+    e2 = out[2]**out[2]
+    e3 = out[3]**out[3]
+    print(e0, e1, e2, e3)
+    p0 = e0 / (e0 + e1 + e2 + e3)
+    p1 = e1 / (e0 + e1 + e2 + e3)
+    p2 = e2 / (e0 + e1 + e2 + e3)
+    p3 = e3 / (e0 + e1 + e2 + e3)
+    return p0, p1, p2, p3
 # x_features = read_inputs(n_files=10, total_mb=30, drizcorr='perform', pctecorr='perform', crsplit=1.0, subarray='false', detector='UVIS', dtype='ASN', instr='ACS')
 
 # {'n_files': 10,
