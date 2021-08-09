@@ -5,6 +5,7 @@ from dash.dependencies import Input, Output
 import plotly.graph_objs as go
 import pandas as pd
 import numpy as np
+import dash_daq as daq
 # import load_data
 
 # df = load_data.get_single_dataset('data/hst_data.csv')
@@ -89,6 +90,196 @@ def make_scatter_figs(instr_dict, xaxis_name, yaxis_name):
     return scatter_figs
 # m, b = np.polyfit(x, y, 1) #slope, intercept
 # plt.plot(x, m*x + b, 'k--'); # best fit line
+
+# INPUTS LEFT COL
+# def feature_inputs_layout():
+#     layout=html.Div(
+#     html.Div(children=[
+#             html.Label([
+#                 html.Label("INSTR", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
+#                     dcc.Dropdown(
+#                         id='instr-state',
+#                         options=[{'label': i, 'value': i} for i in ['ACS', 'COS', 'STIS', 'WFC3']],
+#                         value='ACS',
+#                         style={'color': 'black', 'width': 135, 'display': 'inline-block', 'float': 'right'}
+#                     )
+#                     ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255}),
+#             html.Label([
+#                 html.Label("DTYPE", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
+#                     dcc.Dropdown(
+#                         id='dtype-state',
+#                         options=[{'label': i, 'value': i} for i in ['SINGLETON', 'ASSOCIATION']],
+#                         value='SINGLETON',
+#                         style={'color': 'black', 'width': 135, 'display': 'inline-block', 'float': 'right'}
+#                     ),
+#                     ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255}),
+#             html.Label([
+#                 html.Label("DETECTOR", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
+#                     dcc.Dropdown(
+#                         id='detector-state',
+#                         options=[{'label': i, 'value': i} for i in ['UVIS', 'WFC', 'IR', 'HRC', 'SBC']],
+#                         value='UVIS',
+#                         style={'color': 'black', 'width': 135, 'display': 'inline-block', 'float': 'right'}
+#                     ),
+#                     ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255}),
+#             html.Label([
+#                 html.Label("SUBARRAY", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
+#                     dcc.Dropdown(
+#                         id='subarray-state',
+#                         options=[{'label': i, 'value': i} for i in ['TRUE', 'FALSE']],
+#                         value='FALSE',
+#                         style={'color': 'black', 'width': 135, 'display': 'inline-block', 'float': 'right'}
+#                     ),
+#                     ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255}),
+#             html.Label([
+#                 html.Label("PCTECORR", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
+#                     dcc.Dropdown(
+#                         id='pctecorr-state',
+#                         options=[{'label': i, 'value': i} for i in ['OMIT', 'PERFORM']],
+#                         value='PERFORM',
+#                         style={'color': 'black', 'width': 135, 'display': 'inline-block', 'float': 'right'}
+#                     ),
+#                     ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255}),
+#             # END outputs Left Col
+#         ], style={'display': 'inline-block', 'float': 'left', 'width': 270, 'padding': 5}),
+#         # INPUTS RIGHT COL
+#         html.Div(children=[
+#             html.Label([
+#                 html.Label("DRIZCORR", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
+#                     dcc.Dropdown(
+#                         id='drizcorr-state',
+#                         options=[{'label': i, 'value': i} for i in ['OMIT', 'PERFORM']],
+#                         value='PERFORM',
+#                         style={'color': 'black', 'width': 135, 'display': 'inline-block', 'float': 'right'}
+#                     ),
+#                     ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255}),
+#             html.Label([
+#                 html.Label("CRSPLIT", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
+#                     daq.NumericInput(
+#                         id='crsplit-state',
+#                         value=2,
+#                         min=0,
+#                         max=2,
+#                         style={'color': 'black', 'width': 135, 'display': 'inline-block', 'float': 'right'}
+#                     ),
+#                     ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255}),
+#             html.Label([
+#                 html.Label("TOTAL_MB", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
+#                     daq.NumericInput(
+#                         id='totalmb-state',
+#                         value=4,
+#                         min=0,
+#                         max=900,
+#                         style={'color': 'black', 'width': 135, 'display': 'inline-block', 'float': 'right'}
+#                     ),
+#                     ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255}),
+#             html.Label([
+#                 html.Label("N_FILES", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
+#                     daq.NumericInput(
+#                         id='nfiles-state',
+#                         value=2,
+#                         min=1,
+#                         max=200,
+#                         style={'color': 'black', 'width': 135, 'display': 'inline-block', 'float': 'right'}
+#                     )
+#                     ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255}),
+#             html.Button('Submit', id='submit-button-state', n_clicks=0, style={'margin': 10})
+
+#             # END Input Right COL
+#             ], style={'display': 'inline-block', 'float': 'left', 'width': 270, 'margin': 10, 'padding': 5}
+#             )
+#         )# END INPUTS (BOTH COLS)
+#     return layout
+
+
+
+# def ipst_inputs_layout():
+#     layout=html.Div(
+#     html.Div(children=[
+#     html.Label([
+#         html.Label("IPPPSSOOT", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
+#             dcc.Dropdown(
+#                 id='ipst-state',
+#                 options=[{'label': i, 'value': i} for i in ['j6fl1amnq', 'j6n201010', 'j8nw04020']],
+#                 value='j6fl1amnq',
+#                 style={'color': 'black', 'width': 135, 'display': 'inline-block', 'float': 'right'}
+#             )
+#         ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255}),
+#     html.Label([
+#         html.Label("NFILES", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
+#                 html.P(
+#                     id='nfiles-state-output',
+#                     style={'color': 'white', 'width': 135, 'display': 'inline-block', 'float': 'right'}
+#                 ),
+#                 ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255}),
+#     html.Label([
+#         html.Label("TOTALMB", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
+#                 html.P(
+#                     id='totalmb-state-output',
+#                     style={'color': 'white', 'width': 135, 'display': 'inline-block', 'float': 'right'}
+#                 ),
+#                 ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255}),
+#     html.Label([
+#         html.Label("DRIZCORR", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
+#                 html.P(
+#                     id='drizcorr-state-output',
+#                     style={'color': 'white', 'width': 135, 'display': 'inline-block', 'float': 'right'}
+#                 ),
+#                 ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255}),
+#     ], style={'display': 'inline-block', 'float': 'left', 'width': 270, 'padding': 5}),
+#     html.Label([
+#         html.Label("PCTECORR", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
+#                 html.P(
+#                     id='pctecorr-state-output',
+#                     style={'color': 'white', 'width': 135, 'display': 'inline-block', 'float': 'right'}
+#                 ),
+#                 ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255}),
+#     # RIGHT COL
+#     html.Div(children=[
+#         html.Label([
+#             html.Label("CRSPLIT", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
+#                     html.P(
+#                         id='crsplit-state-output',
+#                         style={'color': 'white', 'width': 135, 'display': 'inline-block', 'float': 'right'}
+#                     ),
+#                     ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255}),
+#         html.Label([
+#             html.Label("SUBARRAY", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
+#                     html.P(
+#                         id='subarray-state-output',
+#                         style={'color': 'white', 'width': 135, 'display': 'inline-block', 'float': 'right'}
+#                     ),
+#                     ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255}),
+#         html.Label([
+#             html.Label("DETECTOR", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
+#                     html.P(
+#                         id='detector-state-output',
+#                         style={'color': 'white', 'width': 135, 'display': 'inline-block', 'float': 'right'}
+#                     ),
+#                     ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255}),
+#         html.Label([
+#             html.Label("DTYPE", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
+#                     html.P(
+#                         id='dtype-state-output',
+#                         style={'color': 'white', 'width': 135, 'display': 'inline-block', 'float': 'right'}
+#                     ),
+#                     ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255}),
+#         html.Label([
+#             html.Label("INSTR", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
+#                     html.P(
+#                         id='instr-state-output',
+#                         style={'color': 'white', 'width': 135, 'display': 'inline-block', 'float': 'right'}
+#                     ),
+#                     ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255}),
+
+#     html.Button('Submit', id='submit-ipst-state', n_clicks=0, style={'margin': 10}),
+
+#     ], style={'display': 'inline-block', 'float': 'left', 'width': 270, 'margin': 10, 'padding': 5}
+#     )
+#     )
+    
+#     return layout
+
 
 # def make_scatter_plot(df):
 #     instr_colors = i_colors()

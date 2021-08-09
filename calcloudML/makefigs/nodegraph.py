@@ -1,29 +1,8 @@
-import dash
-import dash_cytoscape as cyto
-import dash_html_components as html
-from dash.dependencies import Input, Output, State
-import dash_core_components as dcc
-import dash_daq as daq
+from dash_html_components.P import P
 import numpy as np
-import json
-import tensorflow as tf
 import itertools
 
-from .predictor import get_model
-# app = dash.Dash(__name__)
-
-#TODO: REFACTOR (lots of repitition, won't work if model layers change)
-
-# def get_model(model_path):
-#     """Loads pretrained Keras functional model"""
-#     model = tf.keras.models.load_model(model_path)
-#     return model
-
-# def classifier(model, data):
-#     """Returns class prediction"""
-#     pred_proba = model.predict(data)
-#     pred = int(np.argmax(pred_proba, axis=-1))
-#     return pred, pred_proba
+from .predictor import get_model, softmax_activation
 
 
 def input_layer_weights():
@@ -141,7 +120,7 @@ def get_coords(xy_origin, layer_idx):
         neurons = clf.layers[layer_idx].units
     slope = int(3200/neurons)
     xy_coords = []
-    for i in list(range(neurons)):
+    for _ in list(range(neurons)):
         x = x0
         y = y0
         xy_coords.append((x, y))
@@ -170,25 +149,21 @@ def make_nodes(layer, neurons, parent):
 
     xy_origin, layer_idx = set_origin_points(layer)
     xy_coords = get_coords(xy_origin, layer_idx)
-    xs = [x for (x, y) in xy_coords]
-    ys = [y for (x, y) in xy_coords]
+    xs = [x for (x, _) in xy_coords]
+    ys = [y for (_, y) in xy_coords]
+    
     nodes = list(zip(ids, labels, parents, xs, ys))
     return nodes
 
 
 def make_node_groups():
-    input_nodes = make_nodes('x', 9, 'inputs')
-    h1 = make_nodes('h1', 18, 'dense1')
-    h2 = make_nodes('h2', 32, 'dense2')
-    h3 = make_nodes('h3', 64, 'dense3')
-    h4 = make_nodes('h4', 32, 'dense4')
-    h5 = make_nodes('h5', 18, 'dense5')
-    h6 = make_nodes('h6', 9, 'dense6')
-    outputs = make_nodes('y', 4, 'outputs')
-    node_list = [input_nodes, h1, h2, h3, h4, h5, h6, outputs]
+    layers = ['x', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'y']
+    neurons = [9, 18, 32, 64, 32, 18, 9, 4]
+    parents = ['inputs', 'dense1', 'dense2', 'dense3', 'dense4', 'dense5', 'dense6', 'outputs']
     node_groups = []
-    for n in node_list:
-        for id, label, parent, x, y in n:
+    for l, n, p in zip(layers, neurons, parents):
+        group = make_nodes(l, n, p)
+        for id, label, parent, x, y in group:
             node_groups.append((id, label, parent, x, y))
     return node_groups
 
@@ -219,7 +194,6 @@ def node_bias_clicks(node):
     return bias
 
 
-
 def nodes_edges(parent_nodes, node_groups, edge_pairs):
     nodes = [
     {
@@ -230,17 +204,94 @@ def nodes_edges(parent_nodes, node_groups, edge_pairs):
     nodes.extend([
     {
         'data': {'id': id, 'label': label, 'parent': parent},
-        #'classes': 'neurons',
         'position': {'x': x, 'y': y}
     }
     for id, label, parent, x, y in node_groups
     ])
     edges = [
         {'data': {'source': source, 'target': target, 'weight': weight}}
-        #, 'classes': 'weights'}
         for source, target, weight in edge_pairs
     ]
     return nodes, edges
+
+
+def initialize_nodes(parent_nodes, node_groups):
+    # network layers (rectangles containing each group of neurons)
+    nodes = [
+    {
+        'data': {'id': id, 'label': label}, 'classes': layerclass
+    }
+    for id, label, layerclass in parent_nodes
+    ]
+    # add input layer nodes (no classes)
+    nodes.extend([
+        {
+            'data': {'id': id, 'label': label, 'parent': parent},
+            'position': {'x': x, 'y': y}
+        } for id, label, parent, x, y in node_groups[:9]
+    ])
+    return nodes
+
+
+def update_node_groups(node_groups, neurons):
+    # determine neuron classes: 'activated' if n>0, else ''
+    N = []
+    for layer in neurons:
+        N.extend([n for n in layer])
+    num_dense = len(N) - len(neurons[-1])
+    node_groups_updated = []
+    inactive = []
+    for idx, (id, label, parent, x, y) in enumerate(node_groups[9:]):
+        v = N[idx]
+        if idx < num_dense:
+            if v == 0:
+                classes='activatedNode'
+            else:
+                inactive.append(id)
+                classes=''
+        else:
+            if v == np.max(N[-4:]):
+                classes='yPred'
+            else:
+                classes=''
+        node_groups_updated.append((id, label, parent, x, y, classes))
+    return inactive, node_groups_updated
+
+
+def update_edge_pairs(inactive, edge_pairs):
+    # determine weight classes: 'deadRelu' if n==0, else ''
+    edge_pairs_updated = []
+    for source, target, weight in edge_pairs:
+        if source in inactive:
+            classes = 'inactiveRelu'
+        elif target in inactive:
+            classes = 'inactiveRelu'
+        else:
+            classes = ''
+        edge_pairs_updated.append((source, target, weight, classes))
+    return edge_pairs_updated
+
+
+def activate_neurons(parent_nodes, node_groups, edge_pairs, neurons):
+    inactive, node_groups_updated = update_node_groups(node_groups, neurons)
+    edge_pairs_updated = update_edge_pairs(inactive, edge_pairs)
+
+    nodes = initialize_nodes(parent_nodes, node_groups)
+    # update nodes list
+    nodes.extend([
+        {
+            'data': {'id': id, 'label': label, 'parent': parent},
+            'classes': classes,
+            'position': {'x': x, 'y': y}
+        } for id, label, parent, x, y, classes in node_groups_updated
+    ])
+    edges = [
+        {'data': {'source': source, 'target': target, 'weight': weight}
+        , 'classes': classes}
+        for source, target, weight, classes in edge_pairs_updated
+    ]
+    return nodes, edges
+
 
 def make_styles():
     styles = {
@@ -254,6 +305,28 @@ def make_styles():
             'margin': 0,
             'padding': 0,
             'text-align': 'center'
+        },
+        'gradbar-blue': {
+            'color': 'black', 
+            'display': 'inline-block', 
+            'float': 'left',
+            'padding': 5,
+            'background-color': 'linear-gradient(145deg, rgba(33, 134, 244, 0.5) 0%, rgba(33, 134, 244, 0.4) 100%)',
+            'background-image': 'rgb(0, 0, 0)',
+            'background-blend-mode': 'overlay', 
+            'box-shadow': 'rgb(0 0 0 / 45%) 2px 2px 6px 1px, rgb(255 255 255 / 30%) 1px 1px 2px 0px inset, rgb(0 0 0 / 60%) 1px 1px 1px 0px, rgb(33 134 244) 0px 0px 3px 0px'    
+        },
+        'gradbar-green': {
+            'color': 'black', 
+            'display': 'inline-block', 
+            'float': 'left',
+            'padding': 5,
+            #'background-color': '#242a44',
+            'background-color': 'linear-gradient(145deg, rgba(0, 234, 100, 0.5) 0%, rgba(0, 234, 100, 0.4) 100%)',
+            'background-image': 'rgb(0, 0, 0)',
+            #'background-image': 'linear-gradient(145deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.4) 100%)',
+            'background-blend-mode': 'overlay', 
+            'box-shadow': 'rgb(0 0 0 / 45%) 2px 2px 6px 1px, rgb(255 255 255 / 30%) 1px 1px 2px 0px inset, rgb(0 0 0 / 60%) 1px 1px 1px 0px, rgb(0 234 100) 0px 0px 3px 0px'    
         }
     }
     return styles
@@ -268,17 +341,8 @@ def make_stylesheet():
                 }
             },
             {
-                'selector': '.layers',
-                'style': {
-                    'width': 10,
-                    'color': 'white',
-                    'margin': 5
-                    }
-            },
-            {
                 'selector': '.inputLayer',
                 'style': {
-                    'width': 100,
                     'background-color': 'cyan',
                     'color': 'white'
                 }
@@ -286,39 +350,49 @@ def make_stylesheet():
             {
                 'selector': '.outputLayer',
                 'style': {
-                    'width': 100,
-                    'background-color': 'lightgreen',
+                    'background-color': 'hotpink',
                     'color': 'white'
                 }
             },
             {
                 'selector': '.hiddenLayer',
                 'style': {
-                    'background-color': 'beige',
+                    'background-color': '#00EA64',
                     'color': 'white'
                 }
             },
             {
-                'selector': '.heavy',
+                'selector': '.activatedNode',
                 'style': {
-                    'background-color': '#0074D9'
-
+                    'background-color': 'black',
+                    'opacity': 1,
+                    'border-color': 'black',
+                    'border-width': 5,
+                    'border-opacity': 1
+                }
+            },
+            {
+                'selector': '.yPred',
+                'style': {
+                    'background-color': 'black',
+                    'border-color': 'black',
+                    'border-width': 5,
+                    'border-opacity': 1,
+                    'opacity': 1
+                }
+            },
+            {
+                'selector': '.inactiveRelu',
+                'style': {
+                    'line-color': 'transparent',
+                    'opacity': 0.05,
+                    'z-index': -1
                 }
             }
-            # {
-            #     'selector': 'edge',
-            #     #'selector': '[weight > 0]',
-            #     'style': {
-            #         'source-endpoint': 'inside-to-node',
-            #         'target-endpoint': 'inside-to-node',
-            #         'line-style': 'dashed',
-            #         #'line-color': '#eee' 
-            #     }
-            # },
         ]
     return stylesheet
 
-def make_neural_graph(NN=None):
+def make_neural_graph(NN=None, neurons=None):
     if NN is None:
         global clf
         clf = get_model('./models/mem_clf')
@@ -326,375 +400,8 @@ def make_neural_graph(NN=None):
     edge_pairs = make_edges(weights)
     parent_nodes = make_parent_nodes()
     node_groups = make_node_groups()
-    nodes, edges = nodes_edges(parent_nodes, node_groups, edge_pairs)
+    if neurons is None:
+        nodes, edges = nodes_edges(parent_nodes, node_groups, edge_pairs)
+    else:
+        nodes, edges = activate_neurons(parent_nodes, node_groups, edge_pairs, neurons)
     return nodes, edges
-
-# app.layout = html.Div([
-#     # GRAPH
-#     html.Div(children=[
-#     cyto.Cytoscape(
-#         id='cytoscape-compound',
-#         layout={'name': 'preset'},
-#         style={'width': '99vw', 'height': '70vh', 'display': 'inline-block', 'float': 'center', 'background-color': '#1b1f34'},
-#         stylesheet=stylesheet,
-#         elements=edges+nodes
-#     ),
-#     html.Div(children=[
-#         html.P(id='cytoscape-tapNodeData-output', style=styles['pre']),
-#         html.P(id='cytoscape-tapEdgeData-output', style=styles['pre']),
-#         html.P(id='cytoscape-mouseoverNodeData-output', style=styles['pre']),
-#         html.P(id='cytoscape-mouseoverEdgeData-output', style=styles['pre']),
-#     ], style={'width': '100%', 'margin': 0, 'padding': 0, 'display': 'inline-block', 'float': 'left', 'background-color': '#1b1f34'})
-#     ]),
-#     # CONTROLS 
-#     html.Div(children=[
-#     # INPUT DROPDOWNS
-#     html.Div(id='Xi', children=[
-#         # INPUTS LEFT COL
-#         html.Div(children=[
-#             html.Label([
-#                 html.Label("INSTR", style={'padding': 5, 'text-valign': 'center'}),
-#                     dcc.Dropdown(
-#                         id='instr-state',
-#                         options=[{'label': i, 'value': i} for i in ['ACS', 'COS', 'STIS', 'WFC3']],
-#                         value='ACS',
-#                         style={'color': 'black', 'width': 130, 'display': 'inline-block', 'float': 'right'}
-#                     )
-#                     ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 250}),
-#             html.Label([
-#                 html.Label("DTYPE", style={'padding': 5}),
-#                     dcc.Dropdown(
-#                         id='dtype-state',
-#                         options=[{'label': i, 'value': i} for i in ['SINGLETON', 'ASSOCIATION']],
-#                         value='SINGLETON',
-#                         style={'color': 'black', 'width': 130, 'display': 'inline-block', 'float': 'right'}
-#                     ),
-#                     ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 250}),
-#             html.Label([
-#                 html.Label("DETECTOR", style={'padding': 5}),
-#                     dcc.Dropdown(
-#                         id='detector-state',
-#                         options=[{'label': i, 'value': i} for i in ['UVIS', 'WFC', 'IR', 'HRC', 'SBC']],
-#                         value='UVIS',
-#                         style={'color': 'black', 'width': 130, 'display': 'inline-block', 'float': 'right'}
-#                     ),
-#                     ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 250}),
-#             html.Label([
-#                 html.Label("SUBARRAY", style={'padding': 5}),
-#                     dcc.Dropdown(
-#                         id='subarray-state',
-#                         options=[{'label': i, 'value': i} for i in ['TRUE', 'FALSE']],
-#                         value='FALSE',
-#                         style={'color': 'black', 'width': 130, 'display': 'inline-block', 'float': 'right'}
-#                     ),
-#                     ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 250}),
-#             html.Label([
-#                 html.Label("PCTECORR", style={'padding': 5}),
-#                     dcc.Dropdown(
-#                         id='pctecorr-state',
-#                         options=[{'label': i, 'value': i} for i in ['OMIT', 'PERFORM']],
-#                         value='PERFORM',
-#                         style={'color': 'black', 'width': 130, 'display': 'inline-block', 'float': 'right'}
-#                     ),
-#                     ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 250}),
-#             # END outputs Left Col
-#         ], style={'display': 'inline-block', 'float': 'left', 'width': 270, 'margin': 10, 'padding': 5}),
-#         # INPUTS RIGHT COL
-#         html.Div(children=[
-#             html.Label([
-#                 html.Label("DRIZCORR", style={'padding': 5}),
-#                     dcc.Dropdown(
-#                         id='drizcorr-state',
-#                         options=[{'label': i, 'value': i} for i in ['OMIT', 'PERFORM']],
-#                         value='PERFORM',
-#                         style={'color': 'black', 'width': 130, 'display': 'inline-block', 'float': 'right'}
-#                     ),
-#                     ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 250}),
-#             html.Label([
-#                 html.Label("CRSPLIT", style={'padding': 5}),
-#                     daq.NumericInput(
-#                         id='crsplit-state',
-#                         value=2,
-#                         min=0,
-#                         max=2,
-#                         style={'color': 'black', 'width': 130, 'display': 'inline-block', 'float': 'right'}
-#                     ),
-#                     ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 250}),
-#             html.Label([
-#                 html.Label("TOTAL_MB", style={'padding': 5}),
-#                     daq.NumericInput(
-#                         id='totalmb-state',
-#                         value=4,
-#                         min=0,
-#                         max=900,
-#                         style={'color': 'black', 'width': 130, 'display': 'inline-block', 'float': 'right'}
-#                     ),
-#                     ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 250}),
-#             html.Label([
-#                 html.Label("N_FILES", style={'padding': 5}),
-#                     daq.NumericInput(
-#                         id='nfiles-state',
-#                         value=2,
-#                         min=1,
-#                         max=200,
-#                         style={'color': 'black', 'width': 130, 'display': 'inline-block', 'float': 'right'}
-#                     )
-#                     ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 250}),
-            
-#     # TODO SUBMIT BUTTON
-#             html.Button('Submit', id='submit-button-state', n_clicks=0)
-
-#             # END Input Right COL
-#             ], style={'display': 'inline-block', 'float': 'left', 'width': 270, 'margin': 10, 'padding': 5}
-#         # END INPUTS (BOTH COLS)
-#         )], style={'width': 620, 'display': 'inline-block', 'float': 'left', 'padding': 5, 'background-color': '#242a44'}),
-#     # OUTPUTS
-#     html.Div(children=[
-#         # MEMORY PRED VS ACTUAL
-#         html.Div(children=[
-#             # Memory Bin Pred vs Actual LED Display Values
-#             daq.LEDDisplay(
-#                 id='prediction-bin-output',
-#                 label="Y PRED",
-#                 labelPosition='bottom',
-#                 #value='1',
-#                 color="cyan",
-#                 backgroundColor='#242a44',
-#                 style={'padding': 5, 'width': 75, 'display': 'inline-block', 'float': 'left'}
-#                 ),
-#             # daq.LEDDisplay(
-#             #     id='memory-bin-output',
-#             #     label="Y TRUE",
-#             #     labelPosition='bottom',
-#             #     value='2',
-#             #     color='lightgreen',
-#             #     backgroundColor='#242a44',
-#             #     style={'padding': 5, 'width': 75, 'display': 'inline-block', 'float': 'left'}
-#             #     )
-#             ], style={'width': 100, 'margin': 5, 'padding': 5, 'display': 'inline-block', 'float': 'left', 'background-color': '#242a44'}),
-#             # Probabilities
-#         html.Div(children=[
-#             daq.GraduatedBar(
-#                 id='p0',
-#                 label='P(0)',
-#                 labelPosition='right',
-#                 step=0.1,
-#                 min=0,
-#                 max=1,
-#                 #value=0.42,
-#                 showCurrentValue=True,
-#                 vertical=False,
-#                 color='cyan',
-#                 style={'color': 'black', 'display': 'inline-block', 'float': 'left', 'padding': 5}
-#             ),
-#             daq.GraduatedBar(
-#                 id='p1',
-#                 label='P(1)',
-#                 labelPosition='right',
-#                 step=0.1,
-#                 min=0,
-#                 max=1,
-#                 #value=0.99,
-#                 showCurrentValue=True,
-#                 vertical=False,
-#                 color='cyan',
-#                 style={'color': 'black', 'display': 'inline-block', 'float': 'left', 'padding': 5}
-#             ),
-#             daq.GraduatedBar(
-#                 id='p2',
-#                 label='P(2)',
-#                 labelPosition='right',
-#                 step=0.1,
-#                 min=0,
-#                 max=1,
-#                 #value=0.23,
-#                 showCurrentValue=True,
-#                 vertical=False,
-#                 color='cyan',
-#                 style={'color': 'black', 'display': 'inline-block', 'float': 'left', 'padding': 5}
-#             ),
-#             daq.GraduatedBar(
-#                 id='p3',
-#                 label='P(3)',
-#                 labelPosition='right',
-#                 step=0.1,
-#                 min=0,
-#                 max=1,
-#                 #value=0.09,
-#                 showCurrentValue=True,
-#                 vertical=False,
-#                 color='cyan',
-#                 style={'color': 'black', 'display': 'inline-block', 'float': 'left', 'padding': 5}
-#             )
-#             # END Probabilities
-#             ], style={'width': 360, 'padding': 10, 'display': 'inline-block', 'float': 'left', 'color': 'white', 'background-color': '#242a44'}),
-#         # Memory GAUGE Predicted vs Actual
-#         html.Div(children=[
-#             daq.Gauge(
-#                 id='memory-gauge-predicted',
-#                 color={"gradient":True,"ranges":{"yellow":[0,2],"orange":[2,8],"red":[8,16],"blue":[16,64]}},
-#                 #value=4.2,
-#                 label='Predicted',
-#                 labelPosition='bottom',
-#                 units='GB',
-#                 showCurrentValue=True,
-#                 max=64,
-#                 min=0,
-#                 size=150,
-#                 style={'color': 'white', 'display': 'inline-block', 'float': 'left'}
-#                 )
-#             # daq.Gauge(
-#             #     id='memory-gauge-actual',
-#             #     color={"gradient":True,"ranges":{"yellow":[0,2],"orange":[2,8],"red":[8,16],"blue":[16,64]}},
-#             #     value=16,
-#             #     label='Actual',
-#             #     labelPosition='bottom',
-#             #     units='GB',
-#             #     showCurrentValue=True,
-#             #     max=64,
-#             #     min=0,
-#             #     size=150,
-#             #     style={'color': 'white', 'display': 'inline-block', 'float': 'left'}
-#             #     )
-#             ],
-#             style={'width': 375, 'display': 'inline-block', 'float': 'left', 'color': 'white', 'background-color': '#242a44'}),
-#             ])
-#     # END Controls and Outputs
-#     ], style={'width': '100%',  'display': 'inline-block', 'float': 'left', 'background-color': '#242a44'})
-    
-# # END app layout
-# ], style={'width': '100%', 'height': '100%','background-color': '#242a44', 'color':'white'})
-
-
-# @app.callback(
-#     Output('cytoscape-learning-weights-output', 'children'),
-#     Input('cytoscape-compound', 'tapNodeData'))
-# @app.callback(Output('cytoscape-compound', 'stylesheet'),
-
-
-# @app.callback([
-#     Output('prediction-bin-output', 'value'),
-#     Output('memory-gauge-predicted', 'value'),
-#     Output('p0', 'value'),
-#     Output('p1', 'value'),
-#     Output('p2', 'value'),
-#     Output('p3', 'value')],
-#     Input('submit-button-state', 'n_clicks'),
-#     State('nfiles-state', 'value'),
-#     State('totalmb-state', 'value'),
-#     State('drizcorr-state', 'value'),
-#     State('pctecorr-state', 'value'),
-#     State('crsplit-state', 'value'),
-#     State('subarray-state', 'value'),
-#     State('detector-state', 'value'),
-#     State('dtype-state', 'value'),
-#     State('instr-state', 'value')
-#     )
-# def update_output(n_clicks, n_files, total_mb, drizcorr, pctecorr, crsplit, subarray, detector, dtype, instr):
-#     if n_clicks > 0:
-#         x_features = predictor.read_inputs(n_files, total_mb, drizcorr, pctecorr, crsplit, subarray, detector, dtype, instr)
-#         output_preds = predictor.make_preds(x_features)
-#         # predictions = {"memBin": membin, "memVal": memval, "clockTime": clocktime}
-#         #{"predictions": predictions, "probabilities": pred_proba}
-#         membin = output_preds['predictions']['memBin']
-#         memval = output_preds['predictions']['memVal']
-#         proba = output_preds['probabilities'][0]
-#         print(proba)
-#         p0, p1, p2, p3 = proba[0], proba[1], proba[2], proba[3]
-        
-#         n_clicks=0
-#         return [membin, memval, p0, p1, p2, p3]
-
-
-
-# @app.callback(
-#     Output('cytoscape-tapNodeData-output', 'children'),
-#     Input('cytoscape-compound', 'tapNodeData'))
-# def displayTapNodeData(data):
-#     if data:
-#         node = data['id']
-#         if node[0] not in ['x', 'i']:
-#             b = node_bias_clicks(node)
-#         else:
-#             b = None
-#         return f"bias: {node} = {str(b)}"
-
-
-
-# @app.callback(Output('cytoscape-tapEdgeData-output', 'children'),
-#                 Input('cytoscape-compound', 'tapEdgeData'))
-# def displayTapEdgeData(data):
-#     if data:
-#         src = data['source'] # x1
-#         trg = data['target'] # h1-1
-#         w = edge_weight_clicks(src, trg)
-#         return f"weight: {src} and {trg} = {str(w)}"
-
-
-# @app.callback(Output('cytoscape-mouseoverNodeData-output', 'children'),
-#                 Input('cytoscape-compound', 'mouseoverNodeData'))
-# def displayTapNodeData(data):
-#     if data:
-#         node = data['id']
-#         if node[0] not in ['x', 'i']:
-#             b = node_bias_clicks(node)
-#         else:
-#             b = None
-#         return f"bias: {node} = {str(b)}"
-
-
-# @app.callback(Output('cytoscape-mouseoverEdgeData-output', 'children'),
-#                 Input('cytoscape-compound', 'mouseoverEdgeData'))
-# def displayTapEdgeData(data):
-#     if data:
-#         src = data['source'] # x1
-#         trg = data['target'] # h1-1
-#         w = edge_weight_clicks(src, trg)
-#         return f"weight: {src} and {trg} = {str(w)}"
-
-
-# if __name__ == '__main__':
-#     app.run_server(debug=True)
-
-
-
-
-# # 	wallclock	memory	    mem_bin
-# # 	26266.0	    14.138928	2.0
-# # 'n_files': 45.0, 'total_mb': 700.0,
-# # v3 model pred: 2
-# # v3 model pred proba: array([[2.5013131e-01, 3.8796006e-04, 4.8727387e-01, 2.6220685e-01]], dtype=float32)
-# # input_features = {
-# #     'ic0k01010': {
-# #         'x_files': 1.847015, 'x_size': 2.705386, 'drizcorr': 1, 'pctecorr': 1, 'crsplit': 2, 'subarray': 0, 'detector': 1, 'dtype': 1, 'instr': 3
-# #     }
-# # }
-
-
-# # d1_n0_weights = []
-# # for xlabel, weights in input_weights.items():
-# #     d1_n0_weights.append(weights[0]) # weights from all incoming connections to neuron 0 (denselayer1)
-
-
-# # def calculate_weights(node):
-# #     x_weights = input_weights[node]
-# #     idx_min = np.argmin(weights)
-# #     idx_max = np.argmax(weights)
-# #     pos_idx = np.array(np.where(weights>0)).ravel()
-# #     neg_idx = np.array(np.where(weights<0)).ravel()
-    
-# #     node_pairs = [(src, trg) for (src, trg) in edge_pairs if src == node]
-
-# #     w_pos, w_neg = [], []
-# #     w_minmax = []
-# #     for (src, trg) in node_pairs:
-# #         idx_trg = int(trg.split('-')[-1])
-# #         if idx_trg in [idx_min, idx_max]:
-# #             w_minmax.append((src, trg))
-# #         for i, j in zip(pos_idx, neg_idx):
-# #             if idx_trg == i:
-# #                 w_pos.append((src, trg))
-# #             elif idx_trg == j:
-# #                 w_neg.append((src, trg))
-    
-# #     return w_pos, w_neg, w_minmax

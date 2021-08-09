@@ -5,6 +5,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output, State
 import dash_cytoscape as cyto
 import dash_daq as daq
+from dash.exceptions import PreventUpdate
 
 
 from makefigs import cmx, scoring, load_data, roc_auc, features, predictor, nodegraph
@@ -47,7 +48,7 @@ url_bar_and_content_div = html.Div([
 
 layout_index = html.Div(children=[
     html.Br(),
-    html.H1('CALCLOUD', 
+    html.H1('CALCLOUD',
         style={'padding': 15}),
     html.H2('Machine Learning Dashboard'),
     html.Div(children=[
@@ -71,6 +72,7 @@ layout_index = html.Div(children=[
         'display': 'inline-block',
         'float': 'center',
         'padding': '10%',
+        'height': '99vh'
         })
 
 
@@ -329,287 +331,294 @@ layout_page_2 = html.Div(children=[
             })
 
 
-
 layout_page_3 = html.Div(children=[
-# nav
-html.Div(children=[
-    html.Br(),
-    dcc.Link('Home', href='/'),
-    html.Br(),
-    dcc.Link('Model Performance Evaluation', href='/page-1'),
-    html.Br(),
-    dcc.Link('Exploratory Data Analysis', href='/page-2'),
-    html.Br()
-    ]),
+    # nav
+    html.Div(children=[
+        html.P('|', style={'display': 'inline-block'}),
+        dcc.Link('Home', href='/', style={'padding': 5, 'display': 'inline-block'}),
+        html.P('|', style={'display': 'inline-block'}),
+        dcc.Link('Model Performance Evaluation', href='/page-1', style={'padding': 5, 'display': 'inline-block'}),
+        html.P('|', style={'display': 'inline-block'}),
+        dcc.Link('Exploratory Data Analysis', href='/page-2', style={'padding': 10, 'display': 'inline-block'}),
+        html.P('|', style={'display': 'inline-block'}),
+        ], style={'display': 'inline-block'}),
 
-    # GRAPH
-    html.Div(children=[
-    cyto.Cytoscape(
-        id='cytoscape-compound',
-        layout={'name': 'preset'},
-        style={'width': '99vw', 'height': '70vh', 'display': 'inline-block', 'float': 'center', 'background-color': '#1b1f34'},
-        stylesheet=stylesheet,
-        elements=edges+nodes
-    ),
-    html.Div(children=[
-        html.P(id='cytoscape-tapNodeData-output', style=styles['pre']),
-        html.P(id='cytoscape-tapEdgeData-output', style=styles['pre']),
-        html.P(id='cytoscape-mouseoverNodeData-output', style=styles['pre']),
-        html.P(id='cytoscape-mouseoverEdgeData-output', style=styles['pre']),
-    ], style={'width': '100%', 'margin': 0, 'padding': 0, 'display': 'inline-block', 'float': 'left', 'background-color': '#1b1f34'})
-    ]),
+        # GRAPH
+        html.Div(children=[
+        cyto.Cytoscape(
+            id='cytoscape-compound',
+            layout={'name': 'preset'},
+            style={'width': '99vw', 'height': '60vh', 'display': 'inline-block', 'float': 'center', 'background-color': '#1b1f34'},
+            stylesheet=stylesheet,
+            elements=edges+nodes
+        ),
+        html.Div(children=[
+            html.P(id='cytoscape-tapNodeData-output', style=styles['pre']),
+            html.P(id='cytoscape-tapEdgeData-output', style=styles['pre']),
+            html.P(id='cytoscape-mouseoverNodeData-output', style=styles['pre']),
+            html.P(id='cytoscape-mouseoverEdgeData-output', style=styles['pre']),
+        ], style={'width': '100%', 'margin': 0, 'padding': 0, 'display': 'inline-block', 'float': 'left', 'background-color': '#1b1f34'})
+        ]),
     # CONTROLS 
-    html.Div(children=[
-    # INPUT DROPDOWNS
-    html.Div(id='Xi', children=[
-        # INPUTS LEFT COL
-        html.Div(children=[
+    html.Div(id='controls', children=[
+        # # INPUT DROPDOWNS
+        html.Div(id='x-features', children=[
+        # FEATURE SELECTION DROPDOWNS (Left)
+        html.Div(id='inputs-one', children=[
             html.Label([
-                html.Label("INSTR", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
-                    dcc.Dropdown(
-                        id='instr-state',
-                        options=[{'label': i, 'value': i} for i in ['ACS', 'COS', 'STIS', 'WFC3']],
-                        value='ACS',
-                        style={'color': 'black', 'width': 135, 'display': 'inline-block', 'float': 'right'}
+            html.Label("IPPPSSOOT", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
+                dcc.Dropdown(
+                    id='select-ipst',
+                    options=[{'label': i, 'value': i} for i in df.index.values],
+                    value='idio03010',
+                    style={'color': 'black', 'width': 135, 'display': 'inline-block', 'float': 'right'}
                     )
-                    ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255}),
+            ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255}),
             html.Label([
-                html.Label("DTYPE", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
-                    dcc.Dropdown(
-                        id='dtype-state',
-                        options=[{'label': i, 'value': i} for i in ['SINGLETON', 'ASSOCIATION']],
-                        value='SINGLETON',
-                        style={'color': 'black', 'width': 135, 'display': 'inline-block', 'float': 'right'}
-                    ),
-                    ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255}),
+            html.Label("INSTR", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
+                dcc.Dropdown(
+                    id='instr-state',
+                    options=[
+                        {'label': 'ACS', 'value': 0},
+                        {'label': 'COS', 'value': 1},
+                        {'label': 'STIS', 'value': 2},
+                        {'label': 'WFC3', 'value': 3}
+                        ],
+                    value=0,
+                    style={'color': 'black', 'width': 135, 'display': 'inline-block', 'float': 'right'}
+                )
+            ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255}),
             html.Label([
-                html.Label("DETECTOR", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
-                    dcc.Dropdown(
-                        id='detector-state',
-                        options=[{'label': i, 'value': i} for i in ['UVIS', 'WFC', 'IR', 'HRC', 'SBC']],
-                        value='UVIS',
-                        style={'color': 'black', 'width': 135, 'display': 'inline-block', 'float': 'right'}
-                    ),
-                    ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255}),
+            html.Label("DTYPE", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
+                dcc.Dropdown(
+                    id='dtype-state',
+                    options=[
+                        {'label': 'SINGLETON', 'value': 0},
+                        {'label': 'ASSOCIATION', 'value': 1}
+                        ],
+                    value=0,
+                    style={'color': 'black', 'width': 135, 'display': 'inline-block', 'float': 'right'}
+                ),
+            ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255}),
             html.Label([
-                html.Label("SUBARRAY", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
-                    dcc.Dropdown(
-                        id='subarray-state',
-                        options=[{'label': i, 'value': i} for i in ['TRUE', 'FALSE']],
-                        value='FALSE',
-                        style={'color': 'black', 'width': 135, 'display': 'inline-block', 'float': 'right'}
-                    ),
-                    ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255}),
+            html.Label("DETECTOR", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
+            dcc.Dropdown(
+                id='detector-state',
+                options=[
+                    {'label': 'IR/HRC/SBC', 'value': 0},
+                    {'label': 'UVIS/WFC', 'value': 1}
+                    ],
+                value=0,
+                style={'color': 'black', 'width': 135, 'display': 'inline-block', 'float': 'right'}
+            ),
+            ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255}),
             html.Label([
-                html.Label("PCTECORR", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
-                    dcc.Dropdown(
-                        id='pctecorr-state',
-                        options=[{'label': i, 'value': i} for i in ['OMIT', 'PERFORM']],
-                        value='PERFORM',
-                        style={'color': 'black', 'width': 135, 'display': 'inline-block', 'float': 'right'}
-                    ),
-                    ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255}),
-            # END outputs Left Col
-        ], style={'display': 'inline-block', 'float': 'left', 'width': 270, 'padding': 5}),
+            html.Label("SUBARRAY", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
+                dcc.Dropdown(
+                    id='subarray-state',
+                    options=[
+                        {'label': 'TRUE', 'value': 1},
+                        {'label': 'FALSE', 'value': 0}
+                    ],
+                    value=0,
+                    style={'color': 'black', 'width': 135, 'display': 'inline-block', 'float': 'right'}
+                ),
+            ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255})
+        # END outputs Left Col
+        ], style={'display': 'inline-block', 'float': 'left', 'padding': 5, 'width': 270}), #'border': 'thin lightgrey solid',
         # INPUTS RIGHT COL
-        html.Div(children=[
+        html.Div(id='inputs-two', children=[
             html.Label([
-                html.Label("DRIZCORR", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
-                    dcc.Dropdown(
-                        id='drizcorr-state',
-                        options=[{'label': i, 'value': i} for i in ['OMIT', 'PERFORM']],
-                        value='PERFORM',
-                        style={'color': 'black', 'width': 135, 'display': 'inline-block', 'float': 'right'}
-                    ),
-                    ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255}),
+            html.Label("PCTECORR", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
+                dcc.Dropdown(
+                    id='pctecorr-state',
+                    options=[
+                        {'label': 'OMIT', 'value': 0},
+                        {'label': 'PERFORM', 'value': 1}
+                    ],
+                    value=1,
+                    style={'color': 'black', 'width': 135, 'display': 'inline-block', 'float': 'right'}
+                ),
+            ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255}),
             html.Label([
-                html.Label("CRSPLIT", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
-                    daq.NumericInput(
-                        id='crsplit-state',
-                        value=2,
-                        min=0,
-                        max=2,
-                        style={'color': 'black', 'width': 135, 'display': 'inline-block', 'float': 'right'}
-                    ),
-                    ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255}),
+            html.Label("DRIZCORR", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
+                dcc.Dropdown(
+                    id='drizcorr-state',
+                    options=[
+                        {'label': 'OMIT', 'value': 0},
+                        {'label': 'PERFORM', 'value': 1}
+                    ],
+                    value=1,
+                    style={'color': 'black', 'width': 135, 'display': 'inline-block', 'float': 'right'}
+                ),
+            ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255}),
             html.Label([
-                html.Label("TOTAL_MB", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
-                    daq.NumericInput(
-                        id='totalmb-state',
-                        value=4,
-                        min=0,
-                        max=900,
-                        style={'color': 'black', 'width': 135, 'display': 'inline-block', 'float': 'right'}
-                    ),
-                    ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255}),
+            html.Label("CRSPLIT", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
+                daq.NumericInput(
+                    id='crsplit-state',
+                    value=2,
+                    min=0,
+                    max=2,
+                    style={'color': 'black', 'width': 135, 'display': 'inline-block', 'float': 'right'}
+                ),
+            ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255}),
             html.Label([
-                html.Label("N_FILES", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
-                    daq.NumericInput(
-                        id='nfiles-state',
-                        value=2,
-                        min=1,
-                        max=200,
-                        style={'color': 'black', 'width': 135, 'display': 'inline-block', 'float': 'right'}
-                    )
-                    ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255}),
-            
-    # TODO SUBMIT BUTTON
-            html.Button('Submit', id='submit-button-state', n_clicks=0, style={'margin': 10})
+            html.Label("TOTAL_MB", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
+                daq.NumericInput(
+                    id='totalmb-state',
+                    value=4,
+                    min=0,
+                    max=900,
+                    style={'color': 'black', 'width': 135, 'display': 'inline-block', 'float': 'right'}
+                ),
+            ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255}),
+            html.Label([
+            html.Label("N_FILES", style={'padding': 5, 'display': 'inline-block', 'float': 'left'}),
+                daq.NumericInput(
+                    id='nfiles-state',
+                    value=2,
+                    min=1,
+                    max=200,
+                    style={'color': 'black', 'width': 135, 'display': 'inline-block', 'float': 'right'}
+                )
+            ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 255})
 
-            # END Input Right COL
-            ], style={'display': 'inline-block', 'float': 'left', 'width': 270, 'margin': 10, 'padding': 5}
-        # END INPUTS (BOTH COLS)
-        )], style={'width': 620, 'display': 'inline-block', 'float': 'left', 'padding': 5, 'background-color': '#242a44'}),
-    # OUTPUTS
-    html.Div(children=[
+        # END Input Right COL
+        ], style={'display': 'inline-block', 'float': 'left', 'padding': 5, 'width': 270}), #'border': 'thin lightgrey solid',
+        
+        # END FEATURE INPUTS
+        ], style={'display': 'inline-block', 'float':'left',  'paddingTop':20, 'paddingBottom': 5, 'paddingLeft':'2.5%', 'paddingRight':'2.5%', 'background-color': '#242a44', 'min-height': 311}), #'border': 'thin lightgreen solid',
+
         # MEMORY PRED VS ACTUAL
         html.Div(children=[
-            # Memory Bin Pred vs Actual LED Display Values
-            daq.LEDDisplay(
-                id='prediction-bin-output',
-                label="Y PRED",
-                labelPosition='bottom',
-                #value='1',
-                color="cyan",
-                backgroundColor='#242a44',
-                style={'padding': 5, 'width': 75, 'display': 'inline-block', 'float': 'left'}
-                ),
-            # daq.LEDDisplay(
-            #     id='memory-bin-output',
-            #     label="Y TRUE",
-            #     labelPosition='bottom',
-            #     value='2',
-            #     color='lightgreen',
-            #     backgroundColor='#242a44',
-            #     style={'padding': 5, 'width': 75, 'display': 'inline-block', 'float': 'left'}
-            #     )
-            ], style={'width': 100, 'margin': 5, 'padding': 5, 'display': 'inline-block', 'float': 'left', 'background-color': '#242a44'}),
-            # Probabilities
-        html.Div(children=[
-            daq.GraduatedBar(
-                id='p0',
-                label='P(0)',
-                labelPosition='right',
-                step=0.1,
-                min=0,
-                max=1,
-                #value=0.42,
-                showCurrentValue=True,
-                vertical=False,
-                color='cyan',
-                style={'color': 'black', 'display': 'inline-block', 'float': 'left', 'padding': 5}
-            ),
-            daq.GraduatedBar(
-                id='p1',
-                label='P(1)',
-                labelPosition='right',
-                step=0.1,
-                min=0,
-                max=1,
-                #value=0.99,
-                showCurrentValue=True,
-                vertical=False,
-                color='cyan',
-                style={'color': 'black', 'display': 'inline-block', 'float': 'left', 'padding': 5}
-            ),
-            daq.GraduatedBar(
-                id='p2',
-                label='P(2)',
-                labelPosition='right',
-                step=0.1,
-                min=0,
-                max=1,
-                #value=0.23,
-                showCurrentValue=True,
-                vertical=False,
-                color='cyan',
-                style={'color': 'black', 'display': 'inline-block', 'float': 'left', 'padding': 5}
-            ),
-            daq.GraduatedBar(
-                id='p3',
-                label='P(3)',
-                labelPosition='right',
-                step=0.1,
-                min=0,
-                max=1,
-                #value=0.09,
-                showCurrentValue=True,
-                vertical=False,
-                color='cyan',
-                style={'color': 'black', 'display': 'inline-block', 'float': 'left', 'padding': 5}
-            )
-            # END Probabilities
-            ], style={'width': 360, 'padding': 10, 'display': 'inline-block', 'float': 'left', 'color': 'white', 'background-color': '#242a44'}),
+            html.Div(children=[
+                html.Div(children=[
+                    html.Button('PREDICT', id='submit-button-state', n_clicks=0, style={'width': 110})
+                    ], style={'display': 'inline-block', 'float': 'center','width': 120, 'paddingTop':15, 'paddingLeft':15}),
+                html.Div([
+                # Memory Bin Prediction LED Display
+                    daq.LEDDisplay(
+                        id='prediction-bin-output',
+                        # label="PRED",
+                        # labelPosition='bottom',
+                        value='0',
+                        color='#2186f4',
+                        size=64,
+                        backgroundColor='#242a44',
+                        #style={'display': 'inline-block', 'float': 'center'}
+                        )], style={'display': 'inline-block', 'float':'center', 'paddingTop': 20, 'paddingBottom':5, 'paddingLeft': 30, 'width': 120}),
+                html.Div([
+                    daq.BooleanSwitch(
+                        id='activate-button-state',
+                        on=False,
+                        label="ACTIVATE",
+                        labelPosition="bottom",
+                        color='#2186f4') # '#00EA64'
+                    ], style={'display': 'inline-block', 'float': 'center', 'width': 120, 'paddingTop': 15, 'paddingLeft': 10}),
+            ], style={'display': 'inline-block','float':'left', 'padding':5, 'width': 140}), #'border': 'thin lightgrey solid',
+
+    # Probabilities
+            html.Div(children=[
+                html.Div(children=[
+                    daq.GraduatedBar(
+                        id='p0',
+                        label='P(0)',
+                        labelPosition='bottom',
+                        step=0.05,
+                        min=0,
+                        max=1,
+                        value=1.0,
+                        showCurrentValue=True,
+                        vertical=True,
+                        size=220,
+                        color='rgb(33, 134, 244)',
+                        style=styles['gradbar-blue']
+                        ),
+                    daq.GraduatedBar(
+                        id='p1',
+                        label='P(1)',
+                        labelPosition='bottom',
+                        step=0.05,
+                        min=0,
+                        max=1,
+                        value=0.30,
+                        showCurrentValue=True,
+                        vertical=True,
+                        size=220,
+                        color='rgb(33, 134, 244)',
+                        style=styles['gradbar-blue']
+                    ),
+                    daq.GraduatedBar(
+                        id='p2',
+                        label='P(2)',
+                        labelPosition='bottom',
+                        step=0.05,
+                        min=0,
+                        max=1,
+                        value=0.60,
+                        showCurrentValue=True,
+                        vertical=True,
+                        size=220,
+                        color='rgb(33, 134, 244)',
+                        style=styles['gradbar-blue']
+                    ),
+                    daq.GraduatedBar(
+                        id='p3',
+                        label='P(3)',
+                        labelPosition='bottom',
+                        step=0.05,
+                        min=0,
+                        max=1,
+                        value=0.10,
+                        showCurrentValue=True,
+                        vertical=True,
+                        size=220,
+                        color='rgb(33, 134, 244)',
+                        style=styles['gradbar-blue']
+                        )
+                # END Probabilities
+                ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 175})
+            ], style={'display': 'inline-block', 'float': 'left', 'padding': 5, 'width': 190}) #'border': 'thin lightgrey solid', 
+        ], style={'display': 'inline-block', 'float':'left',  'paddingTop':5, 'paddingBottom':5, 'paddingLeft': '2.5%','paddingRight': '2.5%', 'background-color': '#242a44',  'min-height': 326}), #'border': 'thin lightgreen solid',
+
         # Memory GAUGE Predicted vs Actual
         html.Div(children=[
-            daq.Gauge(
-                id='memory-gauge-predicted',
-                color={"gradient":True,"ranges":{"yellow":[0,2],"orange":[2,8],"red":[8,16],"blue":[16,64]}},
-                #value=4.2,
-                label='Predicted',
-                labelPosition='bottom',
-                units='GB',
-                showCurrentValue=True,
-                max=64,
-                min=0,
-                size=150,
-                style={'color': 'white', 'display': 'inline-block', 'float': 'left'}
-                )
-            # daq.Gauge(
-            #     id='memory-gauge-actual',
-            #     color={"gradient":True,"ranges":{"yellow":[0,2],"orange":[2,8],"red":[8,16],"blue":[16,64]}},
-            #     value=16,
-            #     label='Actual',
-            #     labelPosition='bottom',
-            #     units='GB',
-            #     showCurrentValue=True,
-            #     max=64,
-            #     min=0,
-            #     size=150,
-            #     style={'color': 'white', 'display': 'inline-block', 'float': 'left'}
-            #     )
-            ],
-            style={'width': 375, 'display': 'inline-block', 'float': 'left', 'color': 'white', 'background-color': '#242a44'}),
-            ])
+            html.Div(children=[
+            html.Div(children=[
+                daq.Gauge(
+                    id='memory-gauge-predicted',
+                    color='#2186f4', #'#00EA64',
+                    label='Memory (pred)',
+                    labelPosition='bottom',
+                    units='GB',
+                    showCurrentValue=True,
+                    max=64,
+                    min=0,
+                    size=175,
+                    style={'color': 'white', 'display': 'inline-block', 'float': 'left'}
+                    )
+                ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 200}),
+            html.Div(children=[
+                daq.Gauge(
+                    id='wallclock-gauge-predicted',
+                    color='#2186f4', #'#00EA64',
+                    value=4500,
+                    label='Wallclock (pred)',
+                    labelPosition='bottom',
+                    units='SECONDS',
+                    showCurrentValue=True,
+                    max=72000,
+                    min=0,
+                    size=175,
+                    style={'color': 'white', 'display': 'inline-block', 'float': 'left'}
+                    )
+                ], style={'display': 'inline-block', 'float':'left', 'margin': 5, 'width': 200})
+            ], style={'display': 'inline-block', 'float': 'left', 'padding': 5, 'width': 440}) #'border': 'thin lightgrey solid',
+        ], style={'display': 'inline-block', 'float':'left', 'paddingTop': 5,'paddingBottom': 5, 'paddingLeft':'2.5%','paddingRight': '2.5%', 'background-color': '#242a44', 'min-height': 326}), #'border': 'thin lightgreen solid',
     # END Controls and Outputs
-    ], style={'width': '100%',  'display': 'inline-block', 'float': 'left', 'background-color': '#242a44'}),
-    # SUMMARY TEXT
-    # html.Div(children=[
-    #     html.Div(children=[
-    #         html.P("Predict Resource Allocation requirements for memory (GB) and max execution `kill time` or `wallclock` (seconds) using three pre-trained neural networks."),
-    #         html.Br(),
-    #         html.P("MEMORY BIN: classifier outputs probabilities for each of the four bins (`target classes`). The class with the highest probability score is considered the final predicted outcome (y). This prediction variable represents which of the 4 possible memory bins is most likely to meet the minimum required needs for processing an HST dataset (ipppssoot) successfully according to the given inputs (x)."),
-    #         html.Div(children=[
-    #             html.P("Memory Bin Sizes - target class `y`:"),
-    #             html.Li("0: < 2GB"),
-    #             html.Li("1: 2-8GB"),
-    #             html.Li("2: 8-16GB"),
-    #             html.Li("3: >16GB"),
-    #         ]),
-    #         html.Br(),
-    #         html.P("WALLCLOCK REGRESSION: regression generates estimate for specific number of seconds needed to process the dataset using the same input data. This number is then tripled in Calcloud for the sake of creating an extra buffer of overhead in order to prevent larger jobs from being killed unnecessarily."),
-    #         html.Br(),
-    #         html.P("MEMORY REGRESSION: A third regression model is used to estimate the actual value of memory needed for the job. This is mainly for the purpose of logging/future analysis and is not currently being used for allocating memory in calcloud jobs."),    
-    #         ],
-    #         style={
-    #             'width': '50%',
-    #             'display': 'inline-block',
-    #             'float': 'center',
-    #             'padding': 15
-    #         })
-    #     ], style={
-    #     'backgroundColor':'#1b1f34', 
-    #     'color':'white',
-    #     'textAlign': 'center',
-    #     'width': '100%',
-    #     'display': 'inline-block',
-    #     'float': 'center'
-    #     }), # END SUMMARY TEXT
-    
-# PAGE LAYOUT
-], style={'width': '100%', 'height': '100%','background-color': '#242a44', 'color':'white'})
-
-
+    ], style={'width': '100%',  'display': 'inline-block', 'float': 'center', 'background-color': '#242a44'})
+    # PAGE LAYOUT
+    ], style={'width': '100%', 'height': '100%','background-color': '#242a44', 'color':'white'})
 
 
 
@@ -708,22 +717,21 @@ def update_continuous(raw_norm):
         vars = ['x_files', 'x_size']
     continuous_figs = features.make_continuous_figs(acs, cos, stis, wfc3, vars)
     return continuous_figs
-# @app.callback(Output('page-2-display-value', 'children'),
-#               Input('page-2-dropdown', 'value'))
-# def display_value(value):
-#     print('display_value')
-#     return 'You have selected "{}"'.format(value)
 
 
 # PAGE 3 CALLBACKS
-@app.callback([
-    Output('prediction-bin-output', 'value'),
+
+
+@app.callback(
+    [Output('prediction-bin-output', 'value'),
     Output('memory-gauge-predicted', 'value'),
+    Output('wallclock-gauge-predicted', 'value'),
     Output('p0', 'value'),
     Output('p1', 'value'),
     Output('p2', 'value'),
-    Output('p3', 'value')],
-    Input('submit-button-state', 'n_clicks'),
+    Output('p3', 'value'),
+    Output('activate-button-state', 'on')],
+    Input('submit-button-state', 'n_clicks'), 
     State('nfiles-state', 'value'),
     State('totalmb-state', 'value'),
     State('drizcorr-state', 'value'),
@@ -734,21 +742,74 @@ def update_continuous(raw_norm):
     State('dtype-state', 'value'),
     State('instr-state', 'value')
     )
-def update_output(n_clicks, n_files, total_mb, drizcorr, pctecorr, crsplit, subarray, detector, dtype, instr):
-    if n_clicks > 0:
+def update_xi_predictions(
+    n_clicks, n_files, total_mb, drizcorr, pctecorr, crsplit, subarray, detector, dtype, instr
+    ):
+    if n_clicks == 0:
+        raise PreventUpdate
+    # if n_clicks > 0:
+    x_features = predictor.read_inputs(n_files, total_mb, drizcorr, pctecorr, crsplit, subarray, detector, dtype, instr)
+    m_preds = predictor.make_preds(x_features) # [membin, memval, clocktime, p0, p1, p2, p3]
+    n_clicks = 0
+    m_preds.append(0) # reset `activate` toggle switch = off
+    return m_preds
+
+@app.callback(
+    [Output('nfiles-state', 'value'),
+    Output('totalmb-state', 'value'),
+    Output('drizcorr-state', 'value'),
+    Output('pctecorr-state', 'value'),
+    Output('crsplit-state', 'value'),
+    Output('subarray-state', 'value'),
+    Output('detector-state', 'value'),
+    Output('dtype-state', 'value'),
+    Output('instr-state', 'value')],
+    Input('select-ipst', 'value'),
+)
+def update_ipst(selected_ipst):
+    if selected_ipst:
+        inputs = {
+            'n_files': 0, 
+            'total_mb': 0, 
+            'drizcorr': 0, 
+            'pctecorr': 0, 
+            'crsplit': 0, 
+            'subarray': 0, 
+            'detector': 0, 
+            'dtype': 0,
+            'instr': 0
+        }
+        data = df.loc[selected_ipst]
+        for key in list(inputs.keys()):
+            inputs[key] = data[key]
+
+        return list(inputs.values())
+#
+@app.callback(
+    Output('cytoscape-compound', 'elements'),
+    Input('activate-button-state', 'on'),
+    State('nfiles-state', 'value'),
+    State('totalmb-state', 'value'),
+    State('drizcorr-state', 'value'),
+    State('pctecorr-state', 'value'),
+    State('crsplit-state', 'value'),
+    State('subarray-state', 'value'),
+    State('detector-state', 'value'),
+    State('dtype-state', 'value'),
+    State('instr-state', 'value')
+)
+def activate_network(on, n_files, total_mb, drizcorr, pctecorr, crsplit, subarray, detector, dtype, instr):
+    if on == True:
         x_features = predictor.read_inputs(n_files, total_mb, drizcorr, pctecorr, crsplit, subarray, detector, dtype, instr)
-        m_preds = predictor.make_preds(x_features) # [membin, memval, p0, p1, p2, p3]
-        n_clicks = 0
-
-        return m_preds
-        # membin = output_preds['predictions']['memBin']
-        # memval = output_preds['predictions']['memVal']
-        # proba = output_preds['probabilities'][0]
-        # print(proba)
-        # p0, p1, p2, p3 = proba[0], proba[1], proba[2], proba[3]
-        
-        # n_clicks=0
-
+        prep = predictor.Preprocess(x_features)
+        prep.inputs = prep.scrub_keys()
+        prep.load_pt_data()
+        X = prep.transformer()
+        neurons = predictor.calculate_neurons(X)
+        edges, nodes = nodegraph.make_neural_graph(neurons=neurons)
+    else:
+        edges, nodes = nodegraph.make_neural_graph(neurons=None)
+    return edges+nodes
 
 
 @app.callback(
@@ -762,7 +823,6 @@ def displayTapNodeData(data):
         else:
             b = None
         return f"bias: {node} = {str(b)}"
-
 
 
 @app.callback(Output('cytoscape-tapEdgeData-output', 'children'),
@@ -799,3 +859,38 @@ def displayTapEdgeData(data):
 
 if __name__ == '__main__':
     app.run_server(debug=True)
+
+
+
+    # SUMMARY TEXT
+    # html.Div(children=[
+    #     html.Div(children=[
+    #         html.P("Predict Resource Allocation requirements for memory (GB) and max execution `kill time` or `wallclock` (seconds) using three pre-trained neural networks."),
+    #         html.Br(),
+    #         html.P("MEMORY BIN: classifier outputs probabilities for each of the four bins (`target classes`). The class with the highest probability score is considered the final predicted outcome (y). This prediction variable represents which of the 4 possible memory bins is most likely to meet the minimum required needs for processing an HST dataset (ipppssoot) successfully according to the given inputs (x)."),
+    #         html.Div(children=[
+    #             html.P("Memory Bin Sizes - target class `y`:"),
+    #             html.Li("0: < 2GB"),
+    #             html.Li("1: 2-8GB"),
+    #             html.Li("2: 8-16GB"),
+    #             html.Li("3: >16GB"),
+    #         ]),
+    #         html.Br(),
+    #         html.P("WALLCLOCK REGRESSION: regression generates estimate for specific number of seconds needed to process the dataset using the same input data. This number is then tripled in Calcloud for the sake of creating an extra buffer of overhead in order to prevent larger jobs from being killed unnecessarily."),
+    #         html.Br(),
+    #         html.P("MEMORY REGRESSION: A third regression model is used to estimate the actual value of memory needed for the job. This is mainly for the purpose of logging/future analysis and is not currently being used for allocating memory in calcloud jobs."),    
+    #         ],
+    #         style={
+    #             'width': '50%',
+    #             'display': 'inline-block',
+    #             'float': 'center',
+    #             'padding': 15
+    #         })
+    #     ], style={
+    #     'backgroundColor':'#1b1f34', 
+    #     'color':'white',
+    #     'textAlign': 'center',
+    #     'width': '100%',
+    #     'display': 'inline-block',
+    #     'float': 'center'
+    #     }), # END SUMMARY TEXT
