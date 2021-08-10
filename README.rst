@@ -65,6 +65,11 @@ Model Performance Evaluation
 
 Compare and evaluate model versions with roc-auc, precision-recall, keras history, and confusion matrix plots.
 
+.. image:: model-performance.png
+    :alt: Accuracy vs Loss, Keras History 
+
+Accuracy vs Loss Barplots and Keras History (train vs test)
+
 .. image:: roc-auc.png
     :alt: Receiver Operator Characteristic
 
