@@ -82,7 +82,7 @@ Analyze data distributions, linearity and other characteristics.
 Feature Scatterplots by Instrument
 
 
-.. image:: eda-boxplots.png
+.. image:: eda-box-plots.png
     :alt: Feature Boxplots by Instrument
 
 Feature Boxplots by Instrument
