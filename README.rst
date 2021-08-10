@@ -1,4 +1,4 @@
-CALCLOUD-AI
+CALCLOUD MACHINE LEARNING DASHBOARD
 ======================
 
 .. image:: https://readthedocs.org/projects/stsci-package-template/badge/?version=latest
@@ -18,7 +18,10 @@ CALCLOUD-AI
     :alt: Powered by Astropy Badge
 
 
-Artifical Neural Networks for predicting compute resource requirements for Hubble Space Telescope data reprocessing in AWS Lambda (CALCLOUD).
+Interactive dashboard for analysis and evaluation of prediction models for CALCLOUD (Hubble Space Telescope's data reprocessing in the cloud package).
+
+.. image:: neural-network-graph.png
+    :alt: Documentation Status
 
 
 Install
