@@ -20,6 +20,7 @@ CALCLOUD-AI
 
 Artifical Neural Networks for predicting compute resource requirements for Hubble Space Telescope data reprocessing in AWS Lambda (CALCLOUD).
 
+
 Install
 -------
 
@@ -46,7 +47,7 @@ Using virtual env
 Run
 -------
 
-Run the flask app::
+Run the flask app
 
 .. code-block:: bash
     
