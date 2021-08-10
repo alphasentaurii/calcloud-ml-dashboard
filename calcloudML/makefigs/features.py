@@ -6,6 +6,7 @@ import plotly.graph_objs as go
 import pandas as pd
 import numpy as np
 import dash_daq as daq
+
 # import load_data
 
 # df = load_data.get_single_dataset('data/hst_data.csv')
@@ -15,17 +16,18 @@ import dash_daq as daq
 # stis = df.groupby('instr').get_group(2)
 # wfc3 = df.groupby('instr').get_group(3)
 
+
 def df_by_instr(df):
-    acs = df[df['instr'] == 0]
-    cos = df[df['instr'] == 1]
-    stis = df[df['instr'] == 2]
-    wfc3 = df[df['instr'] == 3]
+    acs = df[df["instr"] == 0]
+    cos = df[df["instr"] == 1]
+    stis = df[df["instr"] == 2]
+    wfc3 = df[df["instr"] == 3]
     instr_dict = {
-        'acs': [acs, '#119dff'], 
-        'wfc3': [wfc3, 'salmon'], 
-        'cos': [cos, '#66c2a5'], 
-        'stis': [stis, 'fuchsia']
-        }
+        "acs": [acs, "#119dff"],
+        "wfc3": [wfc3, "salmon"],
+        "cos": [cos, "#66c2a5"],
+        "stis": [stis, "fuchsia"],
+    }
     return instr_dict
 
 
@@ -34,60 +36,50 @@ def make_continuous_figs(acs, cos, stis, wfc3, vars):
 
     for v in vars:
         data = [
-            go.Box(
-                y=acs[v],
-                name='acs'
-            ),
-            go.Box(
-                y=cos[v],
-                name='cos'
-            ),
-            go.Box(
-                y=stis[v],
-                name='stis'
-            ),
-            go.Box(
-                y=wfc3[v],
-                name='wfc3'
-            )
+            go.Box(y=acs[v], name="acs"),
+            go.Box(y=cos[v], name="cos"),
+            go.Box(y=stis[v], name="stis"),
+            go.Box(y=wfc3[v], name="wfc3"),
         ]
         layout = go.Layout(
-            title = f'{v} by instrument',
-            hovermode='closest',
-            paper_bgcolor='#242a44',
-            plot_bgcolor='#242a44',
-            font={'color': '#ffffff'},
+            title=f"{v} by instrument",
+            hovermode="closest",
+            paper_bgcolor="#242a44",
+            plot_bgcolor="#242a44",
+            font={"color": "#ffffff"},
         )
         fig = go.Figure(data=data, layout=layout)
         continuous_figs.append(fig)
-    return continuous_figs  
+    return continuous_figs
 
 
 def make_scatter_figs(instr_dict, xaxis_name, yaxis_name):
     scatter_figs = []
     for instr, (data, color) in instr_dict.items():
         trace = go.Scatter(
-                x=data[xaxis_name],
-                y=data[yaxis_name],
-                text=data['ipst'],
-                mode='markers',
-                opacity=0.7,
-                marker={'size': 15, 'color': color},
-                name=instr
-            )
-        layout = go.Layout(
-            xaxis={'title': xaxis_name},
-            yaxis={'title': yaxis_name},
-            title=instr,
-            #margin={'l': 40, 'b': 40, 't': 10, 'r': 0},
-            hovermode='closest',
-            paper_bgcolor='#242a44',
-            plot_bgcolor='#242a44',
-            font={'color': '#ffffff'},
+            x=data[xaxis_name],
+            y=data[yaxis_name],
+            text=data["ipst"],
+            mode="markers",
+            opacity=0.7,
+            marker={"size": 15, "color": color},
+            name=instr,
         )
-        fig=go.Figure(data=trace, layout=layout)
+        layout = go.Layout(
+            xaxis={"title": xaxis_name},
+            yaxis={"title": yaxis_name},
+            title=instr,
+            # margin={'l': 40, 'b': 40, 't': 10, 'r': 0},
+            hovermode="closest",
+            paper_bgcolor="#242a44",
+            plot_bgcolor="#242a44",
+            font={"color": "#ffffff"},
+        )
+        fig = go.Figure(data=trace, layout=layout)
         scatter_figs.append(fig)
     return scatter_figs
+
+
 # m, b = np.polyfit(x, y, 1) #slope, intercept
 # plt.plot(x, m*x + b, 'k--'); # best fit line
 
@@ -192,7 +184,6 @@ def make_scatter_figs(instr_dict, xaxis_name, yaxis_name):
 #     return layout
 
 
-
 # def ipst_inputs_layout():
 #     layout=html.Div(
 #     html.Div(children=[
@@ -277,7 +268,7 @@ def make_scatter_figs(instr_dict, xaxis_name, yaxis_name):
 #     ], style={'display': 'inline-block', 'float': 'left', 'width': 270, 'margin': 10, 'padding': 5}
 #     )
 #     )
-    
+
 #     return layout
 
 
@@ -311,7 +302,6 @@ def make_scatter_figs(instr_dict, xaxis_name, yaxis_name):
 #   y="memory",
 # )
 # plt.show()
-
 
 
 # app = dash.Dash()
@@ -434,10 +424,9 @@ def make_scatter_figs(instr_dict, xaxis_name, yaxis_name):
 #         plt.plot(x, m*x + b, 'k--'); # best fit line
 
 
-
 # # Checking multicollinearity with a heatmap
 # def multiplot(df, figsize=(20,20), color=None):
-#     corr = np.abs(df.corr().round(3)) 
+#     corr = np.abs(df.corr().round(3))
 #     fig, ax = plt.subplots(figsize=figsize)
 #     if color is None:
 #         color="Blues"
@@ -459,11 +448,11 @@ def make_scatter_figs(instr_dict, xaxis_name, yaxis_name):
 #         name = ''
 #     plt.style.use('seaborn')
 #     fig, axes = plt.subplots(ncols=1, nrows=2, figsize=(11,11))
-    
+
 #     # Create keywords for .set_xticklabels()
-#     tick_kwds = dict(horizontalalignment='right', 
-#                       fontweight='light', 
-#                       fontsize='x-large',   
+#     tick_kwds = dict(horizontalalignment='right',
+#                       fontweight='light',
+#                       fontsize='x-large',
 #                       rotation=45)
 #     sns.boxplot(data=df, x=x, y=y, ax=axes[0])
 #     axes[0].set_xticklabels(axes[0].get_xticklabels(),**tick_kwds)
@@ -471,14 +460,13 @@ def make_scatter_figs(instr_dict, xaxis_name, yaxis_name):
 #     axes[0].set_ylabel('RAM (mb)')
 #     # Boxplot with outliers
 #     axes[0].set_title(f'{name} {x} vs {y}: Boxplot with Outliers')
-    
+
 #     sns.boxplot(data=df, x=x, y=y, ax=axes[1], showfliers=False)
 #     axes[1].set_xticklabels(axes[1].get_xticklabels(),**tick_kwds)
 #     axes[1].set_xlabel(x)
 #     axes[1].set_ylabel('RAM (mb)')
 #     axes[1].set_title(f'{name} {x} vs {y}: Outliers Removed')
 #     fig.tight_layout()
-
 
 
 # def resid_plots(res, preds, target, save=False):
@@ -563,7 +551,6 @@ def make_scatter_figs(instr_dict, xaxis_name, yaxis_name):
 # ax[2].set_title('WFC3')
 
 
-
 # plt.style.use('seaborn-bright')
 # fig, ax = plt.subplots(ncols=4, figsize=(12,6), sharey=True)
 # sns.barplot(data=acs, x='subarray', y='memory', ax=ax[0], order=[0,1])
@@ -575,7 +562,6 @@ def make_scatter_figs(instr_dict, xaxis_name, yaxis_name):
 # ax[2].set_title('WFC3')
 # ax[3].set_title('COS')
 # fig.tight_layout()
-
 
 
 # fig, ax = plt.subplots(ncols=3, nrows=1, figsize=(15,5))

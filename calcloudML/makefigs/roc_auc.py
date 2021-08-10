@@ -2,21 +2,25 @@ import plotly.graph_objects as go
 import plotly.express as px
 import numpy as np
 import pandas as pd
+
 # from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import roc_curve, roc_auc_score, precision_recall_curve, auc, average_precision_score
+from sklearn.metrics import (
+    roc_curve,
+    roc_auc_score,
+    precision_recall_curve,
+    auc,
+    average_precision_score,
+)
 
 
 def make_dummies(y):
-    y_onehot = pd.get_dummies(y, prefix='bin')
+    y_onehot = pd.get_dummies(y, prefix="bin")
     return y_onehot
 
 
 def make_roc_curve(y_onehot, y_scores):
     fig = go.Figure()
-    fig.add_shape(
-        type='line', line=dict(dash='dash'),
-        x0=0, x1=1, y0=0, y1=1
-    )
+    fig.add_shape(type="line", line=dict(dash="dash"), x0=0, x1=1, y0=0, y1=1)
 
     for i in range(y_scores.shape[1]):
         y_true = y_onehot.iloc[:, i]
@@ -26,29 +30,27 @@ def make_roc_curve(y_onehot, y_scores):
         auc_score = roc_auc_score(y_true, y_score)
 
         name = f"{y_onehot.columns[i]} (AUC={auc_score:.2f})"
-        fig.add_trace(go.Scatter(x=fpr, y=tpr, name=name, mode='lines'))
+        fig.add_trace(go.Scatter(x=fpr, y=tpr, name=name, mode="lines"))
 
     fig.update_layout(
-        title_text='ROC-AUC',
-        xaxis_title='False Positive Rate',
-        yaxis_title='True Positive Rate',
+        title_text="ROC-AUC",
+        xaxis_title="False Positive Rate",
+        yaxis_title="True Positive Rate",
         yaxis=dict(scaleanchor="x", scaleratio=1),
-        xaxis=dict(constrain='domain'),
-        width=700, height=500,
-        paper_bgcolor='#242a44',
-        plot_bgcolor='#242a44',
-        font={'color': '#ffffff'}
+        xaxis=dict(constrain="domain"),
+        width=700,
+        height=500,
+        paper_bgcolor="#242a44",
+        plot_bgcolor="#242a44",
+        font={"color": "#ffffff"},
     )
     return fig
 
 
 def make_pr_curve(y_onehot, y_scores):
-    
+
     fig = go.Figure()
-    fig.add_shape(
-        type='line', line=dict(dash='dash'),
-        x0=0, x1=1, y0=1, y1=0
-    )
+    fig.add_shape(type="line", line=dict(dash="dash"), x0=0, x1=1, y0=1, y1=0)
 
     for i in range(y_scores.shape[1]):
         y_true = y_onehot.iloc[:, i]
@@ -58,18 +60,19 @@ def make_pr_curve(y_onehot, y_scores):
         auc_score = average_precision_score(y_true, y_score)
 
         name = f"{y_onehot.columns[i]} (AP={auc_score:.2f})"
-        fig.add_trace(go.Scatter(x=recall, y=precision, name=name, mode='lines'))
+        fig.add_trace(go.Scatter(x=recall, y=precision, name=name, mode="lines"))
 
     fig.update_layout(
-        title_text='Precision-Recall',
-        xaxis_title='Recall',
-        yaxis_title='Precision',
+        title_text="Precision-Recall",
+        xaxis_title="Recall",
+        yaxis_title="Precision",
         yaxis=dict(scaleanchor="x", scaleratio=1),
-        xaxis=dict(constrain='domain'),
-        width=700, height=500,
-        paper_bgcolor='#242a44',
-        plot_bgcolor='#242a44',
-        font={'color': '#ffffff'}
+        xaxis=dict(constrain="domain"),
+        width=700,
+        height=500,
+        paper_bgcolor="#242a44",
+        plot_bgcolor="#242a44",
+        font={"color": "#ffffff"},
     )
     return fig
 
@@ -81,8 +84,6 @@ def make_curves(y, y_scores):
     return [roc_fig, pr_fig]
 
 
-
-
 # if __name__ == ('__main__'):
 #     timestamps = [1620351000, 1620740441, 1620929899, 1621096666]
 #     versions = ["v0", "v1", "v2", "v3"]
@@ -92,7 +93,6 @@ def make_curves(y, y_scores):
 #     y_onehot = make_dummies(y)
 #     fig = make_roc_curve(y, y_onehot, y_scores)
 #     fig.show()
-
 
 
 # # AUC_ROC Plots
@@ -128,9 +128,6 @@ def make_curves(y, y_scores):
 # model.fit(X, y)
 
 
-
-
-
 # def auc_roc_plots(y_true, y_pred):
 #     n_classes = np.unique(y_true)
 #     test_names = ['0', '1', '2', '3']
@@ -144,7 +141,6 @@ def make_curves(y, y_scores):
 #     roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
 
 
-    
 #     n_epochs = list(range(len(y_true)))
 #     data = [go.Scatter(
 #         x = n_epochs,
@@ -171,8 +167,8 @@ def make_curves(y, y_scores):
 
 #     plt.figure()
 #     plt.plot(
-#         fpr["micro"], 
-#         tpr["micro"], 
+#         fpr["micro"],
+#         tpr["micro"],
 #         label='micro-average ROC curve (area = {0:0.2f})'.format(roc_auc["micro"]))
 #     for i in range(n_classes):
 #         plt.plot(fpr[i], tpr[i], label='ROC curve of class {0} (area ={1:0.2f})'.format(test_names[i], roc_auc[i]))
@@ -185,7 +181,6 @@ def make_curves(y, y_scores):
 #     plt.title('ROC curve for Memory Classifier '+str(epochs) +' iter Tensorflow (area = %(0:0.2f))'.format(roc_mean))
 #     plt.legend(loc="lower right")
 #     plt.show()
-
 
 
 # import plotly.express as px

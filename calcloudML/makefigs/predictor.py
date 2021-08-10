@@ -23,25 +23,27 @@ from sklearn.preprocessing import PowerTransformer
 import tensorflow as tf
 import pickle
 
+
 def get_model(model_path):
     """Loads pretrained Keras functional model"""
     model = tf.keras.models.load_model(model_path)
     return model
 
 
-def read_inputs(n_files, total_mb, drizcorr, pctecorr, 
-    crsplit, subarray, detector, dtype, instr):
+def read_inputs(
+    n_files, total_mb, drizcorr, pctecorr, crsplit, subarray, detector, dtype, instr
+):
     x_features = {
-        'n_files': n_files,
-        'total_mb': total_mb,
-        'drizcorr': drizcorr,
-        'pctecorr': pctecorr,
-        'crsplit': crsplit,
-        'subarray': subarray,
-        'detector': detector,
-        'dtype': dtype,
-        'instr': instr
-        }
+        "n_files": n_files,
+        "total_mb": total_mb,
+        "drizcorr": drizcorr,
+        "pctecorr": pctecorr,
+        "crsplit": crsplit,
+        "subarray": subarray,
+        "detector": detector,
+        "dtype": dtype,
+        "instr": instr,
+    }
     print(x_features)
     return x_features
 
@@ -69,35 +71,44 @@ class Preprocess:
         self.s_mean = None
         self.s_sigma = None
 
-
     def scrub_keys(self):
         x = self.x_features
-        n_files = x['n_files']
-        total_mb = x['total_mb']
-        detector = x['detector']
-        subarray = x['subarray']
-        drizcorr = x['drizcorr']
-        pctecorr = x['pctecorr']
-        crsplit = x['crsplit']
-        dtype = x['dtype']
-        instr = x['instr']
+        n_files = x["n_files"]
+        total_mb = x["total_mb"]
+        detector = x["detector"]
+        subarray = x["subarray"]
+        drizcorr = x["drizcorr"]
+        pctecorr = x["pctecorr"]
+        crsplit = x["crsplit"]
+        dtype = x["dtype"]
+        instr = x["instr"]
 
-        inputs = np.array([n_files, total_mb, drizcorr, pctecorr, crsplit, subarray, detector, dtype, instr])
+        inputs = np.array(
+            [
+                n_files,
+                total_mb,
+                drizcorr,
+                pctecorr,
+                crsplit,
+                subarray,
+                detector,
+                dtype,
+                instr,
+            ]
+        )
         return inputs
 
-    
-    def load_pt_data(self, pt_file='./data/pt_transform'):
-        with open(pt_file, 'rb') as pick:
+    def load_pt_data(self, pt_file="./data/pt_transform"):
+        with open(pt_file, "rb") as pick:
             pt_data = pickle.load(pick)
-        
-        self.lambdas = np.array([pt_data['lambdas'][0], pt_data['lambdas'][1]])
-        self.f_mean = pt_data['f_mean']
-        self.f_sigma = pt_data['f_sigma']
-        self.s_mean = pt_data['s_mean']
-        self.s_sigma = pt_data['s_sigma']
-        
-        return self
 
+        self.lambdas = np.array([pt_data["lambdas"][0], pt_data["lambdas"][1]])
+        self.f_mean = pt_data["f_mean"]
+        self.f_sigma = pt_data["f_sigma"]
+        self.s_mean = pt_data["s_mean"]
+        self.s_sigma = pt_data["s_sigma"]
+
+        return self
 
     def transformer(self):
         """applies yeo-johnson power transform to first two indices of array (n_files, total_mb) using lambdas, mean and standard deviation calculated for each variable prior to model training.
@@ -110,12 +121,14 @@ class Preprocess:
         # apply power transformer normalization to continuous vars
         x = np.array([[n_files], [total_mb]]).reshape(1, -1)
         pt = PowerTransformer(standardize=False)
-        pt.lambdas_ = self.lambdas #-1.80648272,  0.0026787
+        pt.lambdas_ = self.lambdas  # -1.80648272,  0.0026787
         xt = pt.transform(x)
         # normalization (zero mean, unit variance)
         x_files = np.round(((xt[0, 0] - self.f_mean) / self.f_sigma), 5)
         x_size = np.round(((xt[0, 1] - self.s_mean) / self.s_sigma), 5)
-        X = np.array([x_files, x_size, X[2], X[3], X[4], X[5], X[6], X[7], X[8]]).reshape(1, -1)
+        X = np.array(
+            [x_files, x_size, X[2], X[3], X[4], X[5], X[6], X[7], X[8]]
+        ).reshape(1, -1)
         print(X)
         return X
 
@@ -124,13 +137,13 @@ def make_preds(x_features, NN=None):
     global clf
     global mem_reg
     if NN is None:
-        clf = get_model('./models/mem_clf')
+        clf = get_model("./models/mem_clf")
         mem_reg = get_model("./models-v0/mem_reg/")
         wall_reg = get_model("./models/wall_reg/")
     else:
-        clf = NN['clf']
-        mem_reg = NN['mem_reg']
-        wall_reg = NN['wall_reg']
+        clf = NN["clf"]
+        mem_reg = NN["mem_reg"]
+        wall_reg = NN["wall_reg"]
     prep = Preprocess(x_features)
     prep.inputs = prep.scrub_keys()
     prep.load_pt_data()
@@ -157,6 +170,7 @@ def relu_activation(layer_num, input_arr, neuron):
     n = np.max([0, wxb])
     return n
 
+
 def layer_neurons(layer_num, input_arr):
     w_dense = np.array(clf.layers[layer_num].weights[0])
     n_neurons = w_dense.shape[1]
@@ -180,11 +194,11 @@ def softmax_activation(out):
     """
     e = np.zeros(shape=(4))
     for i, E in enumerate(out):
-        e[i] = E**E
+        e[i] = E ** E
     print(f"\n*** SOFTMAX: {e}")
     denom = e[0] + e[1] + e[2] + e[3]
-    with np.printoptions(floatmode='maxprec'):
-        Y = np.array([e[0]/denom, e[1]/denom, e[2]/denom, e[3]/denom])
+    with np.printoptions(floatmode="maxprec"):
+        Y = np.array([e[0] / denom, e[1] / denom, e[2] / denom, e[3] / denom])
     print(f"\n*** Y = \n{Y}")
     print(f"\n*** CLASS PREDICTION: {np.argmax(Y)}")
     return Y

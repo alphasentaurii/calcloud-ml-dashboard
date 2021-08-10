@@ -21,7 +21,7 @@ CALCLOUD MACHINE LEARNING DASHBOARD
 Interactive dashboard for analysis and evaluation of prediction models for CALCLOUD (Hubble Space Telescope's data reprocessing in the cloud package).
 
 .. image:: neural-network-graph.png
-    :alt: Documentation Status
+    :alt: Neural Network Interactive Prediction Tool
 
 
 Install
@@ -60,7 +60,32 @@ Run the flask app
 View the running dashboard in your browser: http://127.0.0.1:8050/
 
 
+Model Performance Evaluation
+-------
 
+Compare and evaluate model versions with roc-auc, precision-recall, keras history, and confusion matrix plots.
+
+.. image:: roc-auc.png
+    :alt: Receiver Operator Characteristic
+
+Receiver Operator Characteristic (Area Under the Curve)
+
+
+Exploratory Data Analysis
+-------
+
+Analyze data distributions, linearity and other characteristics.
+
+.. image:: eda-scatterplots.png
+    :alt: Feature Scatterplots by Instrument
+
+Feature Scatterplots by Instrument
+
+
+.. image:: eda-boxplots.png
+    :alt: Feature Boxplots by Instrument
+
+Feature Boxplots by Instrument
 
 License
 -------

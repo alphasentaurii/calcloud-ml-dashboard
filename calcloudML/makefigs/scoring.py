@@ -3,77 +3,88 @@ from plotly import subplots
 
 
 def accuracy_bars(df):
-    acc_train = df.loc['train_acc'].values
-    acc_test = df.loc['test_acc'].values
-    data = [go.Bar(
-        x = list(range(len(acc_train))),
-        y = acc_train,
-        name='Training Accuracy',
-        marker=dict(color='#119dff')
+    acc_train = df.loc["train_acc"].values
+    acc_test = df.loc["test_acc"].values
+    data = [
+        go.Bar(
+            x=list(range(len(acc_train))),
+            y=acc_train,
+            name="Training Accuracy",
+            marker=dict(color="#119dff"),
         ),
         go.Bar(
-        x = list(range(len(acc_test))),
-        y = acc_test,
-        name = 'Test Accuracy',
-        marker=dict(color='#66c2a5')
-        )]
+            x=list(range(len(acc_test))),
+            y=acc_test,
+            name="Test Accuracy",
+            marker=dict(color="#66c2a5"),
+        ),
+    ]
     layout = go.Layout(
-        title='Accuracy',
-        xaxis={'title': 'training iteration'},
-        yaxis={'title': 'score'},
-        paper_bgcolor='#242a44',
-        plot_bgcolor='#242a44',
-        font={'color': '#ffffff'},
+        title="Accuracy",
+        xaxis={"title": "training iteration"},
+        yaxis={"title": "score"},
+        paper_bgcolor="#242a44",
+        plot_bgcolor="#242a44",
+        font={"color": "#ffffff"},
     )
     fig = go.Figure(data=data, layout=layout)
     return fig
 
 
 def loss_bars(df):
-    loss_train = df.loc['train_loss'].values
-    loss_test = df.loc['test_loss'].values
-    data = [go.Bar(
-        x = list(range(len(loss_train))),
-        y = loss_train,
-        name='Training Loss',
-        marker=dict(color='salmon')
+    loss_train = df.loc["train_loss"].values
+    loss_test = df.loc["test_loss"].values
+    data = [
+        go.Bar(
+            x=list(range(len(loss_train))),
+            y=loss_train,
+            name="Training Loss",
+            marker=dict(color="salmon"),
         ),
         go.Bar(
-        x = list(range(len(loss_test))),
-        y = loss_test,
-        name = 'Test Loss',
-        marker=dict(color='peachpuff')
-        )]
+            x=list(range(len(loss_test))),
+            y=loss_test,
+            name="Test Loss",
+            marker=dict(color="peachpuff"),
+        ),
+    ]
     layout = go.Layout(
-        title='Loss',
-        xaxis={'title': 'training iteration'},
-        yaxis={'title': 'score'},
-        paper_bgcolor='#242a44',
-        plot_bgcolor='#242a44',
-        font={'color': '#ffffff'},
+        title="Loss",
+        xaxis={"title": "training iteration"},
+        yaxis={"title": "score"},
+        paper_bgcolor="#242a44",
+        plot_bgcolor="#242a44",
+        font={"color": "#ffffff"},
     )
-    fig = go.Figure(data=data, layout=layout,)
+    fig = go.Figure(
+        data=data,
+        layout=layout,
+    )
     return fig
 
 
 def acc_loss_subplots(acc_fig, loss_fig):
-    fig = subplots.make_subplots(rows=1, cols=2,
-        subplot_titles=('Accuracy', 'Loss'),
-        shared_yaxes = False,
-        x_title='Training Iteration',
-        y_title='Score',
+    fig = subplots.make_subplots(
+        rows=1,
+        cols=2,
+        subplot_titles=("Accuracy", "Loss"),
+        shared_yaxes=False,
+        x_title="Training Iteration",
+        y_title="Score",
     )
     fig.add_trace(acc_fig.data[0], 1, 1)
     fig.add_trace(acc_fig.data[1], 1, 1)
     fig.add_trace(loss_fig.data[0], 1, 2)
     fig.add_trace(loss_fig.data[1], 1, 2)
     fig.update_layout(
-        title_text='Accuracy vs. Loss', 
+        title_text="Accuracy vs. Loss",
         margin=dict(t=50, l=200),
-        paper_bgcolor='#242a44',
-        plot_bgcolor='#242a44',
-        font={'color': '#ffffff',
-        })
+        paper_bgcolor="#242a44",
+        plot_bgcolor="#242a44",
+        font={
+            "color": "#ffffff",
+        },
+    )
     return fig
 
 
@@ -89,27 +100,27 @@ def acc_loss_bars(df, subplots=False):
 
 # KERAS HISTORY
 
+
 def keras_acc_plot(acc_train, acc_test):
     n_epochs = list(range(len(acc_train)))
-    data = [go.Scatter(
-        x = n_epochs,
-        y = acc_train,
-        name='Training Accuracy',
-        marker=dict(color='#119dff')
+    data = [
+        go.Scatter(
+            x=n_epochs,
+            y=acc_train,
+            name="Training Accuracy",
+            marker=dict(color="#119dff"),
         ),
         go.Scatter(
-        x = n_epochs,
-        y = acc_test,
-        name = 'Test Accuracy',
-        marker=dict(color='#66c2a5')
-        )]
+            x=n_epochs, y=acc_test, name="Test Accuracy", marker=dict(color="#66c2a5")
+        ),
+    ]
     layout = go.Layout(
-        title='Accuracy',
-        xaxis={'title': 'n_epochs'},
-        yaxis={'title': 'score'},
-        paper_bgcolor='#242a44',
-        plot_bgcolor='#242a44',
-        font={'color': '#ffffff'},
+        title="Accuracy",
+        xaxis={"title": "n_epochs"},
+        yaxis={"title": "score"},
+        paper_bgcolor="#242a44",
+        plot_bgcolor="#242a44",
+        font={"color": "#ffffff"},
     )
     fig = go.Figure(data=data, layout=layout)
     return fig
@@ -117,37 +128,32 @@ def keras_acc_plot(acc_train, acc_test):
 
 def keras_loss_plot(loss_train, loss_test):
     n_epochs = list(range(len(loss_train)))
-    data = [go.Scatter(
-        x = n_epochs,
-        y = loss_train,
-        name='Training Loss',
-        marker=dict(color='#119dff')
+    data = [
+        go.Scatter(
+            x=n_epochs, y=loss_train, name="Training Loss", marker=dict(color="#119dff")
         ),
-    go.Scatter(
-        x = n_epochs,
-        y = loss_test,
-        name = 'Test Loss',
-        marker=dict(color='#66c2a5')
-        )]
+        go.Scatter(
+            x=n_epochs, y=loss_test, name="Test Loss", marker=dict(color="#66c2a5")
+        ),
+    ]
     layout = go.Layout(
-        title='Loss',
-        xaxis={'title': 'n_epochs'},
-        yaxis={'title': 'score'},
-        paper_bgcolor='#242a44',
-        plot_bgcolor='#242a44',
-        font={'color': '#ffffff'},
+        title="Loss",
+        xaxis={"title": "n_epochs"},
+        yaxis={"title": "score"},
+        paper_bgcolor="#242a44",
+        plot_bgcolor="#242a44",
+        font={"color": "#ffffff"},
     )
     fig = go.Figure(data=data, layout=layout)
     return fig
 
 
 def keras_plots(history):
-    acc_train, acc_test = history['accuracy'], history['val_accuracy']
-    loss_train, loss_test = history['loss'], history['val_loss']
+    acc_train, acc_test = history["accuracy"], history["val_accuracy"]
+    loss_train, loss_test = history["loss"], history["val_loss"]
     keras_acc = keras_acc_plot(acc_train, acc_test)
     keras_loss = keras_loss_plot(loss_train, loss_test)
     return [keras_acc, keras_loss]
-
 
 
 ## GROUPED BAR CHART
@@ -189,4 +195,3 @@ def keras_plots(history):
 # )
 # fig5 = go.Figure(data=data, layout=layout)
 # pyo.plot(fig5, filename='bar2.html')
-

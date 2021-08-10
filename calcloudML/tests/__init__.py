@@ -2,3 +2,6 @@
 """
 This module contains package tests.
 """
+from calcloudML.makefigs import *
+
+__all__ = []
