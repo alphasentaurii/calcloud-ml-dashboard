@@ -38,16 +38,6 @@ DOCKER
 View the running dashboard in your browser: http://0.0.0.0:8050/
 
 
-Run the flask app
-
-.. code-block:: bash
-    
-    cd calcloudML
-    python app.py
-
-View the running dashboard in your browser: http://127.0.0.1:8050/
-
-
 Install (for development)
 -------
 
@@ -69,6 +59,17 @@ Using virtual env
     source dash-venv/bin/activate
     cd calcloud-ml-dashboard
     pip install -r requirements.txt
+
+
+Once installed you can run the flask app locally
+
+.. code-block:: bash
+    
+    git clone https://grit.stsci.edu/rkein/calcloud-ml-dashboard
+    cd calcloud-ml-dashboard/calcloudML
+    python app.py
+
+View the running dashboard in your browser: http://127.0.0.1:8050/
 
 
 Model Performance Evaluation
