@@ -24,7 +24,31 @@ Interactive dashboard for analysis and evaluation of prediction models for CALCL
     :alt: Neural Network Interactive Prediction Tool
 
 
-Install
+Run
+-------
+
+DOCKER
+
+.. code-block:: bash
+    
+    docker pull alphasentaurii/calcloud-ml-dashboard:latest
+    docker run -d -p 8050:8050 alphasentaurii/calcloud-ml-dashboard:latest
+
+
+View the running dashboard in your browser: http://0.0.0.0:8050/
+
+
+Run the flask app
+
+.. code-block:: bash
+    
+    cd calcloudML
+    python app.py
+
+View the running dashboard in your browser: http://127.0.0.1:8050/
+
+
+Install (for development)
 -------
 
 Using setup.py
@@ -45,27 +69,6 @@ Using virtual env
     source dash-venv/bin/activate
     cd calcloud-ml-dashboard
     pip install -r requirements.txt
-
-
-Run
--------
-
-DOCKER
-
-.. code-block:: bash
-    
-    docker pull alphasentaurii/calcloud-ml-dashboard:latest
-    docker run -d -p 8050:8080 alphasentaurii/calcloud-ml-dashboard:latest
-
-
-Run the flask app
-
-.. code-block:: bash
-    
-    cd calcloudML
-    python app.py
-
-View the running dashboard in your browser: http://127.0.0.1:8050/
 
 
 Model Performance Evaluation

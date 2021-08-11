@@ -1,10 +1,8 @@
 import pytest
-import os 
+import os
 
 from calcloudML.makefigs import load_data
 from calcloudML.makefigs import predictor
-
-
 
 
 def test_data_import():
