@@ -20,7 +20,7 @@ CALCLOUD MACHINE LEARNING DASHBOARD
 
 Interactive dashboard for analysis and evaluation of prediction models for CALCLOUD (Hubble Space Telescope's data reprocessing in the cloud package).
 
-.. image:: neural-network-graph.png
+.. image:: previews/neural-network-graph.png
     :alt: Neural Network Interactive Prediction Tool
 
 
@@ -50,6 +50,14 @@ Using virtual env
 Run
 -------
 
+DOCKER
+
+.. code-block:: bash
+    
+    docker pull alphasentaurii/calcloud-ml-dashboard:latest
+    docker run -d -p 8050:8080 alphasentaurii/calcloud-ml-dashboard:latest
+
+
 Run the flask app
 
 .. code-block:: bash
@@ -65,12 +73,12 @@ Model Performance Evaluation
 
 Compare and evaluate model versions with roc-auc, precision-recall, keras history, and confusion matrix plots.
 
-.. image:: model-performance.png
+.. image:: previews/model-performance.png
     :alt: Accuracy vs Loss, Keras History 
 
 Accuracy vs Loss Barplots and Keras History (train vs test)
 
-.. image:: roc-auc.png
+.. image:: previews/roc-auc.png
     :alt: Receiver Operator Characteristic
 
 Receiver Operator Characteristic (Area Under the Curve)
@@ -81,13 +89,13 @@ Exploratory Data Analysis
 
 Analyze data distributions, linearity and other characteristics.
 
-.. image:: eda-scatterplots.png
+.. image:: previews/eda-scatterplots.png
     :alt: Feature Scatterplots by Instrument
 
 Feature Scatterplots by Instrument
 
 
-.. image:: eda-box-plots.png
+.. image:: previews/eda-box-plots.png
     :alt: Feature Boxplots by Instrument
 
 Feature Boxplots by Instrument
